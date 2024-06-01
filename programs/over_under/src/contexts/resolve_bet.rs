@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use anchor_lang::{prelude::*, solana_program, system_program::{transfer, Transfer}};
+use anchor_lang::{prelude::*, system_program::{transfer, Transfer}};
 use anchor_instruction_sysvar::{Ed25519InstructionSignatures, InstructionSysvar};
 use solana_program::{sysvar::instructions::load_instruction_at_checked, ed25519_program, hash::hash};
 
@@ -20,9 +20,7 @@ pub struct ResolveBet<'info> {
     pub global: AccountInfo<'info>,
 
 
-    #[account(
-        mut
-    )]
+    #[account(mut)]
     ///CHECK: This is safe
     pub player: UncheckedAccount<'info>,
 
@@ -87,27 +85,27 @@ impl<'info> ResolveBet<'info> {
         Ok(())
     }
 
-    pub fn resolve_bet(&mut self, bumps: &BTreeMap<String, u8>, sig: &[u8]) -> Result<()> {
+    pub fn resolve_bet(&mut self, bet: &Bet, global: &Global, bumps: &BTreeMap<String, u8>, sig: &[u8]) -> Result<()> {
         let hash = hash(sig).to_bytes();
         let mut hash_16: [u8;16] = [0;16];
         hash_16.copy_from_slice(&hash[0..16]);
         let lower = u128::from_le_bytes(hash_16);
         hash_16.copy_from_slice(&hash[16..32]);
         let upper = u128::from_le_bytes(hash_16);
-        
+    
+        // Calculate the roll as a number between 0 and 100.
         let roll = lower
             .wrapping_add(upper)
-            .wrapping_rem(100) as u8 + 1;
+            .wrapping_rem(101) as u8;
     
-        // Assuming global.number is u8
-        let win_condition = if self.bet.bet { roll > self.global.number } else { roll < self.global.number };
+        // Determine if the player won based on their bet and the roll.
+        let player_won = if bet.bet { roll > global.number } else { roll < global.number };
     
-        if win_condition {
-            // Payout minus house edge
-            let payout = (self.bet.amount as u128)
-            .checked_mul(10000 - HOUSE_EDGE as u128).ok_or(DiceError::Overflow)?
-            .checked_div(self.bet.roll as u128 - 1).ok_or(DiceError::Overflow)?
-            .checked_div(100).ok_or(DiceError::Overflow)? as u64;
+        if player_won {
+            let payout = (bet.amount as u128)
+                .checked_mul(10000 - HOUSE_EDGE as u128).ok_or(DiceError::Overflow)?
+                .checked_div(global.number as u128 - 1).ok_or(DiceError::Overflow)?
+                .checked_div(100).ok_or(DiceError::Overflow)? as u64;
     
             let accounts = Transfer {
                 from: self.vault.to_account_info(),
@@ -123,7 +121,13 @@ impl<'info> ResolveBet<'info> {
                 signer_seeds
             );
             transfer(ctx, payout)?;
+
+            global.number = roll;
         }
         Ok(())
     }
 }
+
+
+// TODO: put the resolve_bet function on an internal timer using the slot number to call the function, then init a new round.
+

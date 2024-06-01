@@ -23,13 +23,11 @@ pub struct Initialize<'info> {
 
 impl<'info> Initialize<'info> {
     pub fn init(&mut self) -> Result<()> {
-
         self.global.set_inner(Global {
             round: 1,
             number: 50,
             bump: self.global.bump,
         });
-
         Ok(())
     }
 }

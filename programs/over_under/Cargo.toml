@@ -15,10 +15,12 @@ cpi = ["no-entrypoint"]
 no-entrypoint = []
 no-idl = []
 no-log-ix-name = []
-idl-build = ["anchor-lang/idl-build"]
 init-if-needed = []
 
+
 [dependencies]
-anchor-lang = { version = "0.30.0", features = ["init-if-needed"] }
+anchor-lang = { version = "0.28.0", features = ["init-if-needed"] }
 anchor-spl = "0.30.0"
+anchor-instruction-sysvar = { git="https://github.com/deanmlittle/anchor-instruction-sysvar" }
+solana-program = "1.16.27"
 

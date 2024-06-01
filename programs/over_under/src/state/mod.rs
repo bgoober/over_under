@@ -11,16 +11,16 @@ pub struct Bet {
 }
 
 impl Bet {
-    pub const LEN: usize = 8 + 32 + 1 + 8 + 16 + 8 + 1;
+    pub const LEN: usize = 8 + 8 + 32 + 1 + 8 + 16 + 8 + 1;
 
-    pub fn to_slice(&self) -> Vec<u8> {
+    pub fn to_slice(&self) -> Box<Vec<u8>> {
         let mut s = self.player.to_bytes().to_vec();
         s.push(self.bet as u8);
         s.extend_from_slice(&self.amount.to_le_bytes());
         s.extend_from_slice(&self.seed.to_le_bytes());
         s.extend_from_slice(&self.slot.to_le_bytes());
         s.extend_from_slice(&self.bump.to_le_bytes());
-        s        
+        Box::new(s)        
     }
 }
 
@@ -28,9 +28,18 @@ impl Bet {
 pub struct Global {
     pub round: u64, // to store the global round
     pub number: u8, // to store the random number of the previous round
+    pub players: Vec<Pubkey>, // the bets of the current round
     pub bump: u8, // the bump used to generate the global PDA
+
 }
 
 impl Global {
-    pub const LEN: usize = 8 + 8 + 1 + 1;
+    pub const LEN: usize = 8 + 8 + 1 + 24 + 32 + 1;
+
+    pub fn set_inner(&mut self, global: Global) {
+        self.round = global.round;
+        self.number = global.number;
+        self.bump = global.bump;
+        self.players = global.players;
+    }
 }

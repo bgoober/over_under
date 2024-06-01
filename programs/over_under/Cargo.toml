@@ -20,7 +20,6 @@ init-if-needed = []
 
 [dependencies]
 anchor-lang = { version = "0.28.0", features = ["init-if-needed"] }
-anchor-spl = "0.30.0"
+solana-program = "1.16.13"
 anchor-instruction-sysvar = { git="https://github.com/deanmlittle/anchor-instruction-sysvar" }
-solana-program = "1.16.27"
 

@@ -5,6 +5,7 @@ use anchor_lang::{
     system_program::{transfer, Transfer},
 };
 
+use crate::state::Global;
 use crate::{errors::DiceError, state::Bet};
 
 #[derive(Accounts)]
@@ -15,6 +16,13 @@ pub struct PlaceBet<'info> {
 
     ///CHECK: This is safe
     pub house: UncheckedAccount<'info>,
+
+    #[account(
+        mut,
+        seeds = [b"global", house.key().as_ref()],
+        bump
+    )]
+    pub global: Account<'info, Global>,
 
     #[account(
         mut,
@@ -59,6 +67,11 @@ impl<'info> PlaceBet<'info> {
         };
 
         let ctx = CpiContext::new(self.system_program.to_account_info(), accounts);
-        transfer(ctx, amount)
+        transfer(ctx, amount)?;
+    
+        // add the player's pubkey to the global account's players vector
+        self.global.players.push(self.player.key());
+
+        Ok(())
     }
 }

@@ -1,8 +1,11 @@
 use std::collections::BTreeMap;
 
-use anchor_lang::{prelude::*, system_program::{Transfer, transfer}};
+use anchor_lang::{
+    prelude::*,
+    system_program::{transfer, Transfer},
+};
 
-use crate::{state::Bet, errors::DiceError};
+use crate::{errors::DiceError, state::Bet};
 
 #[derive(Accounts)]
 pub struct RefundBet<'info> {
@@ -23,7 +26,7 @@ pub struct RefundBet<'info> {
         bump = bet.bump
     )]
     pub bet: Account<'info, Bet>,
-    pub system_program: Program<'info, System>
+    pub system_program: Program<'info, System>,
 }
 
 impl<'info> RefundBet<'info> {
@@ -32,17 +35,20 @@ impl<'info> RefundBet<'info> {
         require!((self.bet.slot - slot) > 1000, DiceError::TimeoutNotReached);
         let accounts = Transfer {
             from: self.vault.to_account_info(),
-            to: self.player.to_account_info()
+            to: self.player.to_account_info(),
         };
 
-        let seeds = [b"vault", &self.house.key().to_bytes()[..], &[*bumps.get("vault").ok_or(DiceError::BumpError)?]];
+        let seeds = [
+            b"vault",
+            &self.house.key().to_bytes()[..],
+            &[*bumps.get("vault").ok_or(DiceError::BumpError)?],
+        ];
         let signer_seeds = &[&seeds[..]][..];
-    
 
         let ctx = CpiContext::new_with_signer(
             self.system_program.to_account_info(),
             accounts,
-            signer_seeds
+            signer_seeds,
         );
 
         transfer(ctx, self.bet.amount)

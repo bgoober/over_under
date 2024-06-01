@@ -5,14 +5,11 @@
 // Losers pay winners, and the house takes a cut of the winnings.
 
 use anchor_lang::prelude::*;
-use anchor_lang::{prelude::*, system_program::{Transfer, transfer}};
-use std::collections::BTreeMap;
-use crate::{state::Bet, errors::DiceError};
 
 mod contexts;
 use contexts::*;
-mod state;
 mod errors;
+mod state;
 
 declare_id!("4z3ZzM7rVH8D2mBuL81TuYBtAxMrWdDziKf8Z34tLxr");
 

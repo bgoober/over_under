@@ -1,27 +1,27 @@
 use crate::state::Global;
 use anchor_lang::prelude::*;
+use std::collections::BTreeMap;
 
 #[derive(Accounts)]
-pub struct Initialize<'info> {
+pub struct GlobalC<'info> {
+    // house
     #[account(mut)]
     pub house: Signer<'info>,
 
-    #[account(mut, seeds = [b"vault", house.key().as_ref()], bump)]
-    pub vault: SystemAccount<'info>,
-
+    // global
     #[account(init_if_needed, payer = house, seeds = [b"global", house.key().as_ref()], space = Global::LEN, bump)]
     pub global: Account<'info, Global>,
 
+    // system program
     pub system_program: Program<'info, System>,
 }
 
-impl<'info> Initialize<'info> {
-    pub fn init(&mut self) -> Result<()> {
-        self.global.set_inner(Global {
+impl<'info> GlobalC<'info> {
+    pub fn init(&mut self, bumps: &BTreeMap<String, u8>,) -> Result<()> {
+        self.global.set_inner( Global {
             round: 1,
             number: 50,
-            players: vec![],
-            bump: self.global.bump,
+            bump: bumps["global"],
         });
         Ok(())
     }

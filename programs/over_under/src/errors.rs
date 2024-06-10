@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 
 #[error_code]
-pub enum DiceError {
+pub enum OUError {
     #[msg("Bump error")]
     BumpError,
     #[msg("Overflow")]
@@ -10,10 +10,10 @@ pub enum DiceError {
     MinimumBet,
     #[msg("Maximum bet exceeded")]
     MaximumBet,
-    #[msg("Minimum roll is 2")]
-    MinimumRoll,
-    #[msg("Maximum roll is 96")]
-    MaximumRoll,
+    // #[msg("Minimum roll is 2")]
+    // MinimumRoll,
+    // #[msg("Maximum roll is 96")]
+    // MaximumRoll,
     #[msg("Timeout not yet reached")]
     TimeoutNotReached,
     #[msg("Ed25519 Header Error")]

@@ -17,21 +17,37 @@ declare_id!("4z3ZzM7rVH8D2mBuL81TuYBtAxMrWdDziKf8Z34tLxr");
 pub mod over_under {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        ctx.accounts.init()
+    pub fn init_global(ctx: Context<GlobalC>) -> Result<()> {
+        ctx.accounts.init(&ctx.bumps)?;
+        Ok(())
     }
 
-    pub fn place_bet(ctx: Context<PlaceBet>, seed: u128, bet: bool, amount: u64) -> Result<()> {
-        ctx.accounts.create_bet(&ctx.bumps, seed, bet, amount)?;
-        ctx.accounts.deposit(amount)
+    pub fn init_round(ctx: Context<RoundC>, _round: u64) -> Result<()> {
+        ctx.accounts.init(_round, &ctx.bumps)?;
+        Ok(())
+
     }
 
-    pub fn resolve_bet(ctx: Context<ResolveBet>, sig: Vec<u8>) -> Result<()> {
+    pub fn place_bet(ctx: Context<BetC>, amount: u64, bet: u8, round: u64) -> Result<()> {
+        ctx.accounts.init(amount, bet, round, &ctx.bumps)?;
+        ctx.accounts.deposit(amount)?;
+        Ok(())
+    }
+
+    pub fn refund_bet(ctx: Context<RefundC>) -> Result<()> {
+        ctx.accounts.refund_bet(&ctx.bumps)?;
+        Ok(())
+    }
+
+    pub fn play_round(ctx: Context<PlayRoundC>, sig: Vec<u8>) -> Result<()> {
         ctx.accounts.verify_ed25519_signature(&sig)?;
-        ctx.accounts.resolve_bet(&ctx.bumps, &sig)
+        ctx.accounts.play_round(&ctx.bumps, &sig)?;
+        Ok(())
     }
 
-    pub fn refund_bet(ctx: Context<RefundBet>) -> Result<()> {
-        ctx.accounts.refund_bet(&ctx.bumps)
+    pub fn resolve_bet(ctx: Context<ResolveC>) -> Result<()> {
+        ctx.accounts.resolve_bet(&ctx.bumps)?;
+        Ok(())
     }
+
 }

@@ -1,45 +1,65 @@
 use anchor_lang::prelude::*;
 
-#[account]
-pub struct Bet {
-    pub player: Pubkey, //  the player's public key
-    pub bet: bool, // the player's bet, true if the player bet over, false if the player bet under
-    pub amount: u64, // the amount the player bet in SOL
-    pub seed: u128, // the seed used to generate more than one bet PDA for the same player within the same round
-    pub slot: u64, // the slot when the bet was placed
-    pub bump : u8 // the bump used to generate the bet PDA
-}
+/// There are 3 Accounts possible: Global, representing the global state of the game.
+/// /// Round, representing a round of the game.
+/// Bet, representing a bet placed by a player.
+/// 
+/// The Global account stores the current round number, the previous round number, and the previous round's randomly generated number, and the bump used to generate the global PDA.
+/// The Round account stores its round number, the randomly generated number of the round, the players that placed a bet in the round, and the bump used to generate the round PDA.
+/// A bet account stores the player's bet, the amount the player bet in SOL, the round the bet was placed in, and the bump used to generate the bet PDA.
 
-impl Bet {
-    pub const LEN: usize = 8 + 8 + 32 + 1 + 8 + 16 + 8 + 1;
 
-    pub fn to_slice(&self) -> Box<Vec<u8>> {
-        let mut s = self.player.to_bytes().to_vec();
-        s.push(self.bet as u8);
-        s.extend_from_slice(&self.amount.to_le_bytes());
-        s.extend_from_slice(&self.seed.to_le_bytes());
-        s.extend_from_slice(&self.slot.to_le_bytes());
-        s.extend_from_slice(&self.bump.to_le_bytes());
-        Box::new(s)        
-    }
-}
-
+// #[account]
 #[account]
 pub struct Global {
     pub round: u64, // to store the global round
     pub number: u8, // to store the random number of the previous round
-    pub players: Vec<Pubkey>, // the bets of the current round
     pub bump: u8, // the bump used to generate the global PDA
-
 }
 
 impl Global {
-    pub const LEN: usize = 8 + 8 + 1 + 24 + 32 + 1;
+    pub const LEN: usize = 8 + 8 + 1 + 1;
 
     pub fn set_inner(&mut self, global: Global) {
         self.round = global.round;
         self.number = global.number;
         self.bump = global.bump;
-        self.players = global.players;
+    }
+}
+
+#[account]
+pub struct Round {
+    pub round: u64, // the round number
+    pub number: u8, // the random number of the round
+    pub outcome: u8, // the outcome of the user's bet vs the number drawn. evaluated and updated in resolve round
+    pub bump: u8, // the bump used to generate the round PDA
+}
+
+impl Round { 
+    pub const LEN: usize = 8+8+1+1+1;
+
+    pub fn set_inner(&mut self, round: Round) {
+        self.round = round.round;
+        self.number = round.number;
+        self.bump = round.bump;
+    }
+}
+
+#[account]
+pub struct Bet {
+    pub bet: u8, // the player's bet, true if the player bet over, false if the player bet under
+    pub amount: u64, // the amount the player bet in SOL
+    pub round: u64, // the slot when the bet was placed
+    pub bump : u8 // the bump used to generate the bet PDA
+}
+
+impl Bet {
+    pub const LEN: usize = 8+1+8+8+1;
+
+    pub fn set_inner(&mut self, bet: Bet) {
+        self.bet = bet.bet;
+        self.amount = bet.amount;
+        self.round = bet.round;
+        self.bump = bet.bump;
     }
 }

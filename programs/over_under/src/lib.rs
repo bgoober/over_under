@@ -34,20 +34,15 @@ pub mod over_under {
         Ok(())
     }
 
-    pub fn refund_bet(ctx: Context<RefundC>) -> Result<()> {
-        ctx.accounts.refund_bet(&ctx.bumps)?;
-        Ok(())
-    }
-
     pub fn play_round(ctx: Context<PlayRoundC>, sig: Vec<u8>) -> Result<()> {
         ctx.accounts.verify_ed25519_signature(&sig)?;
         ctx.accounts.play_round(&ctx.bumps, &sig)?;
         Ok(())
     }
 
-    pub fn resolve_bet(ctx: Context<ResolveC>) -> Result<()> {
+    pub fn resolve_bet(ctx: Context<ResolveBetC>) -> Result<()> {
         ctx.accounts.resolve_bet(&ctx.bumps)?;
         Ok(())
     }
-
+    
 }

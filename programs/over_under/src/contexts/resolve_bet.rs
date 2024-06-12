@@ -1,15 +1,12 @@
 use std::collections::BTreeMap;
 
-use anchor_lang::{
-    prelude::*,
-    system_program::{transfer, Transfer},
-};
+use anchor_lang::prelude::*;
 
-use crate::{errors::OUError, state::Bet, state::Global, state::Round};
+use crate::{state::Bet, state::Global, state::Round};
 
 
 #[derive(Accounts)]
-pub struct ResolveC<'info> {
+pub struct ResolveBetC<'info> {
     // thread is signer
     #[account(mut)]
     pub thread: Signer<'info>,
@@ -44,10 +41,10 @@ pub struct ResolveC<'info> {
     pub system_program: Program<'info, System>
 }
 
-impl <'info> ResolveC<'info> {
+impl <'info> ResolveBetC<'info> {
     pub fn resolve_bet(&mut self, bumps: &BTreeMap<String, u8>) -> Result<()> {
         // if the self.bet.round is the same as the round.number, then continue, else error
-        // require!((self.bet.round == self.global.round), OUError::RoundNotOver);
+        // require!((self.bet.round == self.global.round), Error::RoundNotOver);
         Ok(())
 
     }

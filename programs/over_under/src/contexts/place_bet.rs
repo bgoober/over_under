@@ -8,7 +8,7 @@ use crate::state::Bet;
 
 use crate::state::Round;
 
-use crate::errors::OUError;
+//use crate::errors::Error;
 use crate::state::Global;
 
 #[derive(Accounts)]

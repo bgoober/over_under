@@ -1,0 +1,7 @@
+Ben
+
+Over_Under
+
+User Story: "As a crypto user, gamer, and gambler, I want a simple, quick, multiplayer betting game that I can play and automatically receive my winnings if I've won."
+
+House/Developer Story: "As a developer I want to create an easy-to-use, easy-to-understand multiplayer betting game that allows users to play quickly and repeatedly. I want to automate the initialization of the game's Rounds, as well as its payouts as much as possible in order to attain the best possible user experience when receiving their winnings."

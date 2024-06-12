@@ -1,13 +1,10 @@
 use std::collections::BTreeMap;
 
-use anchor_lang::{prelude::*, system_program::{Transfer, transfer}};
-use anchor_instruction_sysvar::{Ed25519InstructionSignatures, InstructionSysvar};
+use anchor_lang::prelude::*;
+use anchor_instruction_sysvar::{Ed25519InstructionSignatures};
 use solana_program::{sysvar::instructions::load_instruction_at_checked, ed25519_program, hash::hash};
 
-use crate::{state::Bet, errors::OUError, state::Global, state::Round};
-
-
-pub const HOUSE_EDGE: u16 = 150; // 1.5% House edge
+use crate::{errors::Error, state::Global, state::Round};
 
 #[derive(Accounts)]
 pub struct PlayRoundC<'info> {
@@ -51,26 +48,26 @@ impl<'info> PlayRoundC<'info> {
             &self.instruction_sysvar.to_account_info()
         )?;
         // Make sure the instruction is addressed to the ed25519 program
-        require_keys_eq!(ix.program_id, ed25519_program::ID, OUError::Ed25519Program);
+        require_keys_eq!(ix.program_id, ed25519_program::ID, Error::Ed25519Program);
         // Make sure there are no accounts present
-        require_eq!(ix.accounts.len(), 0, OUError::Ed25519Accounts);
+        require_eq!(ix.accounts.len(), 0, Error::Ed25519Accounts);
         
         let signatures = Ed25519InstructionSignatures::unpack(&ix.data)?.0;
 
-        require_eq!(signatures.len(), 1, OUError::Ed25519DataLength);
+        require_eq!(signatures.len(), 1, Error::Ed25519DataLength);
         let signature = &signatures[0];
 
         // Make sure all the data is present to verify the signature
-        require!(signature.is_verifiable, OUError::Ed25519Header);
+        require!(signature.is_verifiable, Error::Ed25519Header);
         
         // Ensure public keys match
-        require_keys_eq!(signature.public_key.ok_or(OUError::Ed25519Pubkey)?, self.house.key(), OUError::Ed25519Pubkey);
+        require_keys_eq!(signature.public_key.ok_or(Error::Ed25519Pubkey)?, self.house.key(), Error::Ed25519Pubkey);
 
         // Ensure signatures match
-        require!(&signature.signature.ok_or(OUError::Ed25519Signature)?.eq(sig), OUError::Ed25519Signature);
+        require!(&signature.signature.ok_or(Error::Ed25519Signature)?.eq(sig), Error::Ed25519Signature);
 
         // Ensure messages match
-        require!(&signature.message.as_ref().ok_or(OUError::Ed25519Signature)?.eq(&self.bet.to_slice()), OUError::Ed25519Signature);
+        require!(&signature.message.as_ref().ok_or(Error::Ed25519Signature)?.eq(&self.round.to_slice()), Error::Ed25519Signature);
 
         Ok(())
     }

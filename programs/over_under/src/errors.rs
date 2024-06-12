@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 
 #[error_code]
-pub enum OUError {
+pub enum Error {
     #[msg("Bump error")]
     BumpError,
     #[msg("Overflow")]

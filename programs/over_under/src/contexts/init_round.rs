@@ -1,5 +1,4 @@
 use anchor_lang::prelude::*;
-use solana_program::instruction;
 use std::collections::BTreeMap;
 
 use crate::state::Round;
@@ -46,6 +45,8 @@ impl <'info> RoundC<'info> {
             round: _round,
             number: 0,
             outcome: 0, // 0 for false, 1 for true, 2 for tie
+            // players with a max length of 100
+            players: [(Pubkey::new_from_array([0; 32]), 0, 0); 100],
             bump: bumps["round"]
         });
         Ok(())

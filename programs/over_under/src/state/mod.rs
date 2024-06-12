@@ -19,18 +19,13 @@ pub struct Global {
 
 impl Global {
     pub const LEN: usize = 8 + 8 + 1 + 1;
-
-    pub fn set_inner(&mut self, global: Global) {
-        self.round = global.round;
-        self.number = global.number;
-        self.bump = global.bump;
-    }
 }
 
 #[account]
 pub struct Round {
     pub round: u64, // the round number
     pub number: u8, // the random number of the round
+    pub players: [(Pubkey, u8, u64); 100],  // a tuple of players that placed a bet in the round -- set for 100 players 
     pub outcome: u8, // the outcome of the user's bet vs the number drawn. evaluated and updated in resolve round
     pub bump: u8, // the bump used to generate the round PDA
 }
@@ -38,10 +33,13 @@ pub struct Round {
 impl Round { 
     pub const LEN: usize = 8+8+1+1+1;
 
-    pub fn set_inner(&mut self, round: Round) {
-        self.round = round.round;
-        self.number = round.number;
-        self.bump = round.bump;
+    pub fn to_slice(&self) -> Vec<u8> {
+        let mut s = self.round.to_le_bytes().to_vec();
+        s.extend_from_slice(&self.number.to_le_bytes());
+        s.extend_from_slice(&self.outcome.to_le_bytes());
+        s.extend_from_slice(&self.bump.to_le_bytes());
+        s.extend_from_slice(&self.round.to_le_bytes());
+        s        
     }
 }
 
@@ -55,11 +53,5 @@ pub struct Bet {
 
 impl Bet {
     pub const LEN: usize = 8+1+8+8+1;
-
-    pub fn set_inner(&mut self, bet: Bet) {
-        self.bet = bet.bet;
-        self.amount = bet.amount;
-        self.round = bet.round;
-        self.bump = bet.bump;
-    }
 }
+

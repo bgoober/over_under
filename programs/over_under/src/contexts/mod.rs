@@ -10,5 +10,3 @@ pub use place_bet::*;
 pub mod play_round;
 pub use play_round::*;
 
-pub mod resolve_bet;
-pub use resolve_bet::*;

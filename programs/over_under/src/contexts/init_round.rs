@@ -29,7 +29,7 @@ pub struct RoundC<'info> {
 
     // round pda of the global account
     #[account(init, payer = thread, seeds = [b"round", global.key().as_ref(), _round.to_le_bytes().as_ref()], space = Round::LEN, bump)]
-    pub round: Account<'info, Round>,
+    pub round: Box<Account<'info, Round>>,
 
     // vault pda of the round account
     #[account(mut, seeds = [b"vault", round.key().as_ref()], bump)]
@@ -43,11 +43,12 @@ impl <'info> RoundC<'info> {
     pub fn init(&mut self, _round: u64, bumps: &BTreeMap<String, u8>) -> Result<()> {
         self.round.set_inner(Round {
             round: _round,
-            number: 0,
+            number: 101,
             outcome: 0, // 0 for false, 1 for true, 2 for tie
             // players with a max length of 100
-            players: [(Pubkey::new_from_array([0; 32]), 0, 0); 100],
-            bump: bumps["round"]
+            players: Vec::with_capacity(100),
+            winners: Vec::with_capacity(100),
+            bump: *bumps.get("round").unwrap(),
         });
         Ok(())
     }

@@ -27,7 +27,7 @@ pub struct BetC<'info> {
         bump
     )]
     pub global: Account<'info, Global>,
-
+    
     // round the player is placing a bet in,
     #[account(seeds = [b"round", global.key().as_ref(), global.round.to_le_bytes().as_ref()], bump)]
     pub round: Account<'info, Round>,
@@ -38,7 +38,7 @@ pub struct BetC<'info> {
 
     // bet account to store the bet which is a pda of the round account
     #[account(init, payer = player, seeds = [b"bet", round.key().as_ref(), player.key().as_ref()], space = Bet::LEN, bump)]
-    pub bet: Account<'info, Bet>,
+    pub bet: Box<Account<'info, Bet>>,
 
     // system program to transfer SOL
     pub system_program: Program<'info, System>,
@@ -48,11 +48,20 @@ impl<'info> BetC<'info> {
     // create bet function to create a bet
     pub fn init(&mut self, amount: u64, bet: u8, round: u64, bumps: &BTreeMap<String, u8>) -> Result<()> {
         self.bet.set_inner(Bet {
+            player: self.player.key(),
             amount,
             bet: bet,
             round,
-            bump: bumps["bet"],
+            bump: *bumps.get("bet").unwrap(),
         });
+        Ok(())
+    }
+
+    // upate the round.players with the player's pubkey
+    pub fn update_round_players(&mut self) -> Result<()> {
+        if !self.round.players.contains(&self.player.key) {
+            self.round.players.push(*self.player.key);
+        }
         Ok(())
     }
 

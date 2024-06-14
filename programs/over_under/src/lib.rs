@@ -39,10 +39,5 @@ pub mod over_under {
         ctx.accounts.play_round(&ctx.bumps, &sig)?;
         Ok(())
     }
-
-    pub fn resolve_bet(ctx: Context<ResolveBetC>) -> Result<()> {
-        ctx.accounts.resolve_bet(&ctx.bumps)?;
-        Ok(())
-    }
     
 }

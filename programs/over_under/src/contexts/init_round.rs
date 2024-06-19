@@ -43,8 +43,8 @@ impl <'info> RoundC<'info> {
     pub fn init(&mut self, _round: u64, bumps: &BTreeMap<String, u8>) -> Result<()> {
         self.round.set_inner(Round {
             round: _round,
-            number: 101,
-            outcome: 0, // 0 for false, 1 for true, 2 for tie
+            number: 101, 
+            outcome: 3, // 0 for false, 1 for true, 2 for tie, 3 for ongoing
             // players with a max length of 100
             players: Vec::with_capacity(100),
             winners: Vec::with_capacity(100),

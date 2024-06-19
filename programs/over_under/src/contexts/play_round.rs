@@ -1,13 +1,17 @@
 use std::collections::BTreeMap;
 
 use anchor_instruction_sysvar::Ed25519InstructionSignatures;
-use anchor_lang::{ prelude::*, system_program::{transfer, Transfer}};
+use anchor_lang::{
+    prelude::*,
+    system_program::{transfer, Transfer},
+};
 use solana_program::{
     ed25519_program, hash::hash, sysvar::instructions::load_instruction_at_checked,
 };
 
 use crate::{
-    __private::__idl::__cpi_client_accounts_idl_close_account::IdlCloseAccount, errors::Error, state::{Bet, Global, Round}
+    errors::Error,
+    state::{Bet, Global, Round},
 };
 
 #[derive(Accounts)]
@@ -33,7 +37,7 @@ pub struct PlayRoundC<'info> {
     pub round: Account<'info, Round>,
 
     // vault pda of the round account
-    #[account(mut, seeds = [b"vault", round.key().as_ref()], bump, close = house)]
+    #[account(mut, seeds = [b"vault", round.key().as_ref()], bump)]
     pub vault: SystemAccount<'info>,
 
     #[account(
@@ -92,11 +96,8 @@ impl<'info> PlayRoundC<'info> {
         let roll = self.calculate_roll(sig);
         self.round.number = roll;
         self.update_round_outcome();
-        self.calculate_winners(); // updates the round.winners vector
-        self.payout_winners(); // pays out the winners
         self.update_global_state();
-
-
+        // + calculate winners will be in the lib.rs file
         Ok(())
     }
 
@@ -122,77 +123,8 @@ impl<'info> PlayRoundC<'info> {
         }
     }
 
-    pub fn calculate_winners(&mut self) -> Result<()> {
-
-        let pot = self.vault.lamports();
-
-        // a winners pot must be created that is equal to the total sum of each player's bet.amount who won the game
-        let mut winners_pot: u64 = 0;
-
-        // iterate through each account in the remaining account
-        // compare the players bet to the outcome of the round, and if they won, add their bet.amount to the winners_pot
-        for account in ctx.remaining_accounts.iter() {
-            let _account_key = account.key();
-            let data = account.try_borrow_mut_data();
-
-            //Deserialize the data from the account and save it in an Account variable
-            let account_to_write = Bet::try_deserialize(&mut data.unwrap().as_ref())
-                .expect("Error Deserializing Bet Account Data");
-
-            if account_to_write.bet == self.round.outcome {
-                winners_pot += account_to_write.amount;
-                let payout = (account_to_write.amount / winners_pot) * pot;
-                self.round.winners.push((_account_key, payout));
-            }
-
-            // close the Bet account
-            account_to_write.close();
-
-
-            let account = AccountsClose {
-                account: account_to_write.to_account_info(),
-                destination: self.bet.player.key(),
-            };
-
-        }
-
-        Ok(())
-    }
-
-    pub fn payout_winners(&mut self) -> Result<()> {
-        // iterate through each winner in the round.winners array and transfer the payout to the winner's pubkey
-        for &(ref winner_pubkey, amount) in self.round.winners.iter() {
-            let cpi_program = self.system_program.to_account_info();
-    
-            let cpi_accounts = Transfer {
-                from: self.vault.to_account_info(),
-                to: winner_pubkey.to_account_info(), // Use the winner's pubkey
-            };
-    
-            let seeds = &[
-                b"vault",
-                self.round.key().as_ref(),
-                &[self.round.bump],
-            ];
-    
-            let signer_seeds = &[&seeds[..]];
-    
-            let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
-    
-            // Transfer the amount won by the winner
-            transfer(cpi_ctx, amount)?;
-        }
-
-        // close the vault account
-        self.vault.close();
-    
-        Ok(())
-    }
-
-
     pub fn update_global_state(&mut self) {
         self.global.number = self.round.number;
         self.global.round += 1;
     }
 }
-// TODO: put the resolve_bet function on an internal timer using the slot number to call the function, then init a new round.

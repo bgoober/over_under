@@ -11,6 +11,8 @@ use crate::state::Round;
 //use crate::errors::Error;
 use crate::state::Global;
 
+use crate::errors::Error;
+
 #[derive(Accounts)]
 #[instruction(len: u16)]
 pub struct BetC<'info> {
@@ -47,6 +49,10 @@ pub struct BetC<'info> {
 impl<'info> BetC<'info> {
     // create bet function to create a bet
     pub fn init(&mut self, amount: u64, bet: u8, round: u64, bumps: &BTreeMap<String, u8>) -> Result<()> {
+        
+        if self.round.outcome != 3 || self.round.number != 101 {
+            return Err(Error::RoundAlreadyPlayed.into());
+        } else {
         self.bet.set_inner(Bet {
             player: self.player.key(),
             amount,
@@ -56,6 +62,7 @@ impl<'info> BetC<'info> {
         });
         Ok(())
     }
+}
 
     // upate the round.players with the player's pubkey
     pub fn update_round_players(&mut self) -> Result<()> {

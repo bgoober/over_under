@@ -12,27 +12,27 @@ use anchor_lang::prelude::*;
 // #[account]
 #[account]
 pub struct Global {
+    pub auth: Pubkey, // the pubkey of the signer of init global
     pub round: u64, // to store the global round
     pub number: u8, // to store the random number of the previous round
     pub bump: u8, // the bump used to generate the global PDA
 }
 
 impl Global {
-    pub const LEN: usize = 8 + 8 + 1 + 1;
+    pub const LEN: usize = 8 + 32 + 8 + 1 + 1;
 }
 
 #[account]
 pub struct Round {
     pub round: u64, // the round number
     pub number: u8, // the random number of the round
-    pub players: Vec<Pubkey>,  // an array of 100 pubkeys
-    pub winners: Vec<(Pubkey, u64)>, // an array of 100 pubkeys
+    pub bets: Vec<Pubkey>, // the players that placed a bet in the round
     pub outcome: u8, // the outcome of the user's bet vs the number drawn. evaluated and updated in resolve round
     pub bump: u8, // the bump used to generate the round PDA
 }
 
 impl Round { 
-    pub const LEN: usize = 8+8+1+1+1+4+((24*(32+8) * 100)*2);
+    pub const LEN: usize = 8+8+1+4+(32*100)+1+1;
 
     pub fn to_slice(&self) -> Vec<u8> {
         let mut s = self.round.to_le_bytes().to_vec();
@@ -49,7 +49,7 @@ pub struct Bet {
     pub player: Pubkey, // the player who placed the bet
     pub bet: u8, // the player's bet, true if the player bet over, false if the player bet under
     pub amount: u64, // the amount the player bet in SOL
-    pub round: u64, // the slot when the bet was placed
+    pub round: u64, // the round the bet was placed in
     pub bump : u8 // the bump used to generate the bet PDA
 }
 

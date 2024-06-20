@@ -60,17 +60,19 @@ impl<'info> BetC<'info> {
             round,
             bump: *bumps.get("bet").unwrap(),
         });
+
+        self.round.bets.push(self.bet.key());  
         Ok(())
     }
 }
 
     // upate the round.players with the player's pubkey
-    pub fn update_round_players(&mut self) -> Result<()> {
-        if !self.round.players.contains(&self.player.key) {
-            self.round.players.push(*self.player.key);
-        }
-        Ok(())
-    }
+    // pub fn update_round_players(&mut self) -> Result<()> {
+    //     if !self.round.players.contains(&self.player.key) {
+    //         self.round.players.push(*self.player.key);
+    //     }
+    //     Ok(())
+    // }
 
     // deposit to vault function
     pub fn deposit(&mut self, amount: u64) -> Result<()> {

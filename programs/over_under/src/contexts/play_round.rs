@@ -131,54 +131,56 @@ impl<'info> PlayRoundC<'info> {
             for bet_account_pubkey in self.round.bets.iter() {
 
                 // Deserialize the Bet account data
-                let bet = Bet::try_from_slice(bet_account_pubkey)?;
+              let bet = Bet::try_deserialize(&mut bet_account_pubkey.as_ref()).expect("Error deserializing access pda");
 
                 if bet.bet == self.round.outcome {
                     winners_pot += bet.amount;
-                    winners.push((bet.player, bet.amount));
+                    winners.push((bet_account_pubkey.key(), bet.amount));
                 }
             }
 
-            // Make a cpi transfer to each winner
-            for (winner_pubkey, amount) in winners.iter() {
-                let cpi_program = self.system_program.to_account_info();
+        // Make a cpi transfer to each winner
+        for (winner_betkey, amount) in winners.iter() {
+            let cpi_program = self.system_program.to_account_info();
 
-                let cpi_accounts = Transfer {
-                    from: self.vault.to_account_info(),
-                    to: winner_pubkey.to_account_info(),
-                };
+            let bet = Bet::try_deserialize(&mut winner_betkey.as_ref()).expect("Error deserializing access pda");
 
-                let seeds = &[
-                    b"vault",
-                    self.round.key().as_ref(),
-                    //&[*bumps.get("round").unwrap()],
-                ];
+            let cpi_accounts = Transfer {
+                from: self.vault.to_account_info(),
+                to: bet.player.to_account_info(),
+            };
 
-                let signer_seeds = &[&seeds[..]];
+            let seeds = &[
+                b"vault",
+                self.round.key().as_ref(),
+                //&[*bumps.get("round").unwrap()],
+            ];
 
-                let cpi_ctx: CpiContext<Transfer> =
-                    CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
+            let signer_seeds = &[&seeds[..]];
 
-                // Perform the transfer
-                transfer(cpi_ctx, *amount)?;
+            let cpi_ctx: CpiContext<Transfer> =
+                CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
 
-                // // Close the Bet account
-                // close_account(CloseAccountContext {
-                //     account: winner_pubkey.to_account_info(),
-                //     destination: self.house.to_account_info(),
-                //     owner: cpi_program,
-                // })?;
-            }
+            // Perform the transfer
+            transfer(cpi_ctx, *amount)?;
 
-            //     // Close the Round account
-            //     close_account(CloseAccountContext {
-            //         account: self.round.to_account_info(),
-            //         destination: self.house.to_account_info(),
-            //         owner: self.system_program.to_account_info(),
-            //     })?;
-            // }
+            // // Close the Bet account
+            // close_account(CloseAccountContext {
+            //     account: winner_pubkey.to_account_info(),
+            //     destination: self.house.to_account_info(),
+            //     owner: cpi_program,
+            // })?;
         }
-        Ok(())
+
+        //     // Close the Round account
+        //     close_account(CloseAccountContext {
+        //         account: self.round.to_account_info(),
+        //         destination: self.house.to_account_info(),
+        //         owner: self.system_program.to_account_info(),
+        //     })?;
+        // }
+    }
+    Ok(())
     }
 
     pub fn calculate_roll(&self, sig: &[u8]) -> u8 {

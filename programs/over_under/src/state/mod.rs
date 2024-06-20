@@ -55,5 +55,14 @@ pub struct Bet {
 
 impl Bet {
     pub const LEN: usize = 8+32+1+8+8+1;
+
+    pub fn to_slice(&self) -> Vec<u8> {
+        let mut s = self.bet.to_le_bytes().to_vec();
+        s.extend_from_slice(&self.player.to_bytes());
+        s.extend_from_slice(&self.amount.to_le_bytes());
+        s.extend_from_slice(&self.bump.to_le_bytes());
+        s.extend_from_slice(&self.round.to_le_bytes());
+        s        
+    }
 }
 

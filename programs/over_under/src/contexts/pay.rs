@@ -1,4 +1,7 @@
-use anchor_lang::{prelude::*, system_program::{transfer, Transfer}};
+use anchor_lang::{
+    prelude::*,
+    system_program::{transfer, Transfer},
+};
 
 use crate::state::{Bet, Global, Round};
 
@@ -51,17 +54,14 @@ impl<'info> PayC<'info> {
                 to: self.house.to_account_info(),
             };
 
-            let seeds = &[b"vault", self.round.to_account_info().key.as_ref(),
-            ];
+            let seeds = &[b"vault", self.round.to_account_info().key.as_ref()];
 
             let signer = &[&seeds[..]];
 
             let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
 
             transfer(cpi_ctx, amount)?;
-
         } else if self.bet.payout > 0 && self.player.key() == self.bet.player.key() {
-
             let amount = self.bet.payout;
             let cpi_program = self.system_program.to_account_info();
 
@@ -69,17 +69,17 @@ impl<'info> PayC<'info> {
                 from: self.vault.to_account_info(),
                 to: self.player.to_account_info(),
             };
-    
-            let seeds = &[b"vault", self.round.to_account_info().key.as_ref(),
-            ];
+
+            let seeds = &[b"vault", self.round.to_account_info().key.as_ref()];
 
             let signer = &[&seeds[..]];
-    
+
             let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
-    
+
             transfer(cpi_ctx, amount)?;
-    
         }
+
+        self.bet.close(self.player.to_account_info())?;
         Ok(())
     }
 }

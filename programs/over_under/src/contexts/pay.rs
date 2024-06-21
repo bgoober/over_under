@@ -35,7 +35,7 @@ pub struct PayC<'info> {
 
     #[account(mut, close = player,
         seeds = [b"bet", round.key().as_ref(), player.key().as_ref()],
-        bump
+        bump, has_one = player
     )]
     pub bet: Account<'info, Bet>,
 

@@ -28,11 +28,11 @@ pub struct BetC<'info> {
         seeds = [b"global", house.key().as_ref()],
         bump
     )]
-    pub global: Account<'info, Global>,
+    pub global: Box<Account<'info, Global>>,
     
     // round the player is placing a bet in,
     #[account(seeds = [b"round", global.key().as_ref(), global.round.to_le_bytes().as_ref()], bump)]
-    pub round: Account<'info, Round>,
+    pub round: Box<Account<'info, Round>>,
 
     // vault pda of the round account
     #[account(mut, seeds = [b"vault", round.key().as_ref()], bump)]

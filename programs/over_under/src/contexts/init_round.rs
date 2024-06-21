@@ -23,7 +23,7 @@ pub struct RoundC<'info> {
         seeds = [b"global", house.key().as_ref()],
         bump
     )]
-    pub global: Account<'info, Global>,
+    pub global: Box<Account<'info, Global>>,
 
     // round pda of the global account
     #[account(init, payer = thread, seeds = [b"round", global.key().as_ref(), _round.to_le_bytes().as_ref()], space = Round::LEN, bump)]

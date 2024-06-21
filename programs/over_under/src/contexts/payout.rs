@@ -43,7 +43,7 @@ pub struct PayC<'info> {
 }
 
 impl<'info> PayC<'info> {
-    pub fn pay(&mut self) -> Result<()> {
+    pub fn payout(&mut self) -> Result<()> {
         // if the round.outcome = 2, then send all lamports in the vault to the house
         // else if the signer is equal to the bet.player key, then transfer the bet.payout to the player
         if self.round.outcome == 2 {

@@ -32,7 +32,7 @@ pub struct Round {
 }
 
 impl Round { 
-    pub const LEN: usize = 8+8+1+(4+(32*100))+1+1;
+    pub const LEN: usize = 8+8+1+(4+(32*10))+1+1;
 
     pub fn to_slice(&self) -> Vec<u8> {
         let mut s = self.round.to_le_bytes().to_vec();

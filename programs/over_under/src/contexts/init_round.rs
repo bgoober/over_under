@@ -43,7 +43,7 @@ impl <'info> RoundC<'info> {
             round: _round,
             number: 101, 
             outcome: 3,
-            bets: Vec::with_capacity(100),
+            bets: Vec::with_capacity(10),
             bump: *bumps.get("round").unwrap(),
         });
         Ok(())

@@ -45,8 +45,8 @@ pub mod over_under {
         Ok(())
     }
 
-    pub fn pay(ctx: Context<PayC>) -> Result<()> {
-        ctx.accounts.pay()?;
+    pub fn payout(ctx: Context<PayC>) -> Result<()> {
+        ctx.accounts.payout()?;
         Ok(())
     }
 }

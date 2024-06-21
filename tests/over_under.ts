@@ -1,6 +1,7 @@
 import * as anchor from "@coral-xyz/anchor";
-import { Program } from "@coral-xyz/anchor";
+import { Program, web3 } from "@coral-xyz/anchor";
 import { OverUnder } from "../target/types/over_under";
+import { PublicKey } from '@solana/web3.js';
 
 describe("over_under", () => {
   // Configure the client to use the local cluster.

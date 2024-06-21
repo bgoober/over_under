@@ -39,7 +39,6 @@ impl Round {
         s.extend_from_slice(&self.number.to_le_bytes());
         s.extend_from_slice(&self.outcome.to_le_bytes());
         s.extend_from_slice(&self.bump.to_le_bytes());
-        s.extend_from_slice(&self.round.to_le_bytes());
         s        
     }
 }
@@ -50,19 +49,11 @@ pub struct Bet {
     pub bet: u8, // the player's bet, true if the player bet over, false if the player bet under
     pub amount: u64, // the amount the player bet in SOL
     pub round: u64, // the round the bet was placed in
+    pub payout: u64, // the payout of the bet, calculated in resolve round
     pub bump : u8 // the bump used to generate the bet PDA
 }
 
 impl Bet {
-    pub const LEN: usize = 8+32+1+8+8+1;
-
-    pub fn to_slice(&self) -> Vec<u8> {
-        let mut s = self.bet.to_le_bytes().to_vec();
-        s.extend_from_slice(&self.player.to_bytes());
-        s.extend_from_slice(&self.amount.to_le_bytes());
-        s.extend_from_slice(&self.bump.to_le_bytes());
-        s.extend_from_slice(&self.round.to_le_bytes());
-        s        
-    }
+    pub const LEN: usize = 8+32+1+8+8+1+1;
 }
 

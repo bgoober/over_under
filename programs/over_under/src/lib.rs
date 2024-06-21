@@ -16,7 +16,6 @@ declare_id!("4z3ZzM7rVH8D2mBuL81TuYBtAxMrWdDziKf8Z34tLxr");
 #[program]
 pub mod over_under {
 
-
     use super::*;
 
     pub fn init_global(ctx: Context<GlobalC>) -> Result<()> {
@@ -42,6 +41,12 @@ pub mod over_under {
         // Play the round, which calculates the roll, updates the round number,
         // the outcome of the round, and updates global state
         ctx.accounts.play_round(&ctx.bumps, &sig)?;
+
+        Ok(())
+    }
+
+    pub fn pay(ctx: Context<PayC>) -> Result<()> {
+        ctx.accounts.pay()?;
         Ok(())
     }
 }

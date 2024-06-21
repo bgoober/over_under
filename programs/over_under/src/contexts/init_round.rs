@@ -42,12 +42,8 @@ impl <'info> RoundC<'info> {
         self.round.set_inner(Round {
             round: _round,
             number: 101, 
-            outcome: 3, 
+            outcome: 3,
             bets: Vec::with_capacity(100),
-            // 0 for false, 1 for true, 2 for tie, 3 for ongoing
-            // players with a max length of 100
-            // players: Vec::with_capacity(100),
-            // winners: Vec::with_capacity(100),
             bump: *bumps.get("round").unwrap(),
         });
         Ok(())

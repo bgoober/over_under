@@ -1,10 +1,9 @@
 use std::collections::BTreeMap;
 
 use anchor_instruction_sysvar::Ed25519InstructionSignatures;
-use anchor_lang::{
-    prelude::*,
-    system_program::{transfer, Transfer},
-};
+use anchor_lang::
+    prelude::*
+;
 use solana_program::{
     ed25519_program, hash::hash, sysvar::instructions::load_instruction_at_checked,
 };
@@ -98,89 +97,9 @@ impl<'info> PlayRoundC<'info> {
         self.round.number = roll;
         self.update_round_outcome();
         self.update_global_state();
-        // + calculate winners will be in the lib.rs file
+        self.calculate_winners();
 
-        let mut winners_pot: u64 = 0;
-        let mut winners: Vec<(Pubkey, u64)> = Vec::new();
-
-        // Perform the transfer if the round outcome is 2
-        if self.round.outcome == 2 {
-            let cpi_program = self.system_program.to_account_info();
-
-            let pot = self.vault.lamports();
-            // cpi transfer from vault to house
-            let cpi_accounts = Transfer {
-                from: self.vault.to_account_info(),
-                to: self.house.to_account_info(),
-            };
-
-            let seeds = &[
-                b"vault",
-                self.round.key().as_ref(),
-                //&[*bumps.get("round").unwrap()],
-            ];
-
-            let signer_seeds = &[&seeds[..]];
-
-            let cpi_ctx: CpiContext<Transfer> =
-                CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
-
-            transfer(cpi_ctx, pot)?;
-        } else {
-            // Iterate over the bets
-            for bet_account_pubkey in self.round.bets.iter() {
-
-                // Deserialize the Bet account data
-              let bet = Bet::try_deserialize(&mut bet_account_pubkey.as_ref()).expect("Error deserializing access pda");
-
-                if bet.bet == self.round.outcome {
-                    winners_pot += bet.amount;
-                    winners.push((bet_account_pubkey.key(), bet.amount));
-                }
-            }
-
-        // Make a cpi transfer to each winner
-        for (winner_betkey, amount) in winners.iter() {
-            let cpi_program = self.system_program.to_account_info();
-
-            let bet = Bet::try_deserialize(&mut winner_betkey.as_ref()).expect("Error deserializing access pda");
-
-            let cpi_accounts = Transfer {
-                from: self.vault.to_account_info(),
-                to: bet.player.to_account_info(),
-            };
-
-            let seeds = &[
-                b"vault",
-                self.round.key().as_ref(),
-                //&[*bumps.get("round").unwrap()],
-            ];
-
-            let signer_seeds = &[&seeds[..]];
-
-            let cpi_ctx: CpiContext<Transfer> =
-                CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
-
-            // Perform the transfer
-            transfer(cpi_ctx, *amount)?;
-
-            // // Close the Bet account
-            // close_account(CloseAccountContext {
-            //     account: winner_pubkey.to_account_info(),
-            //     destination: self.house.to_account_info(),
-            //     owner: cpi_program,
-            // })?;
-        }
-
-        //     // Close the Round account
-        //     close_account(CloseAccountContext {
-        //         account: self.round.to_account_info(),
-        //         destination: self.house.to_account_info(),
-        //         owner: self.system_program.to_account_info(),
-        //     })?;
-        // }
-    }
-    Ok(())
+        Ok(())
     }
 
     pub fn calculate_roll(&self, sig: &[u8]) -> u8 {
@@ -210,88 +129,28 @@ impl<'info> PlayRoundC<'info> {
         self.global.round += 1;
     }
 
-    // iterate over self.round.bets vector
-    // calculate the winners (internally) by comparing self.round.outcome vs each accounts bet.bet
-    // calculate the round the winners_pot, each winner's payout,
-    // then transfer the payout to the winner's bet from the round's vault
-    // close the bet to the owner of the bet
-    // first check if the round.outcome == 2, and if it is, send all the vault's balance to the house, if not, assess winners and payout equal to
-    // // the players perctentage of the total winning_bets amount * the vault's balance
-    // pub fn calculate_winners(&mut self) -> Result<()> {
-    // let mut winners_pot: u64 = 0;
-    // let mut winners: Vec<(Pubkey, u64)> = Vec::new();
+    pub fn calculate_winners(&mut self) {
+        // Step 1: Collect necessary changes without mutating `self.round`
+        let mut total_winners_pot = 0;
+        let mut winner_accounts = Vec::new();
 
-    // // Perform the transfer if the round outcome is 2
-    // if self.round.outcome == 2 { Ok({
-    //     let cpi_program = self.system_program.to_account_info();
+        let vault = self.vault.lamports();
 
-    //     let pot = self.vault.lamports();
-    //     // cpi transfer from vault to house
-    //     let cpi_accounts = Transfer {
-    //         from: self.vault.to_account_info(),
-    //         to: self.house.to_account_info(),
-    //     };
+        for betkey in &self.round.bets {
+            let account_to_write =
+                Bet::try_deserialize(&mut betkey.as_ref()).expect("Error Deserializing Data");
+            if account_to_write.bet == self.round.outcome {
+                total_winners_pot += account_to_write.amount;
+                winner_accounts.push((betkey.clone(), account_to_write)); // Collect winners to update later
+            }
+        }
 
-    //     let seeds = &[
-    //         b"vault",
-    //         self.round.key().as_ref(),
-    //         //&[*bumps.get("round").unwrap()],
-    //     ];
+        // Step 2: Apply collected changes
+        for (mut betkey, mut account_to_write) in winner_accounts {
 
-    //     let signer_seeds = &[&seeds[..]];
-
-    //     let cpi_ctx: CpiContext<Transfer> =
-    //         CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
-
-    //     transfer(cpi_ctx, pot)?;
-    // }) } else {
-    //     // Iterate over the bets
-    //     for bet in self.round.bets.iter() {
-    //         if bet.bet == self.round.outcome {
-    //             winners_pot += bet.amount;
-    //             winners.push((bet.player, bet.amount));
-    //         }
-    //     }
-
-    //     // Make a cpi transfer to each winner
-    //     for (winner_pubkey, amount) in winners.iter() {
-    //         let cpi_program = self.system_program.to_account_info();
-
-    //         let cpi_accounts = Transfer {
-    //             from: self.vault.to_account_info(),
-    //             to: winner_pubkey.to_account_info(),
-    //         };
-
-    //         let seeds = &[
-    //             b"vault",
-    //             self.round.key().as_ref(),
-    //             //&[*bumps.get("round").unwrap()],
-    //         ];
-
-    //         let signer_seeds = &[&seeds[..]];
-
-    //         let cpi_ctx: CpiContext<Transfer> =
-    //             CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
-
-    //         // Perform the transfer
-    //         transfer(cpi_ctx, *amount)?;
-
-    //         // // Close the Bet account
-    //         // close_account(CloseAccountContext {
-    //         //     account: winner_pubkey.to_account_info(),
-    //         //     destination: self.house.to_account_info(),
-    //         //     owner: cpi_program,
-    //         // })?;
-    //     }
-
-    //     //     // Close the Round account
-    //     //     close_account(CloseAccountContext {
-    //     //         account: self.round.to_account_info(),
-    //     //         destination: self.house.to_account_info(),
-    //     //         owner: self.system_program.to_account_info(),
-    //     //     })?;
-    //     // }
-
-    //     Ok(())
-    // }
+            let payout = (account_to_write.amount / total_winners_pot) * vault;
+            account_to_write.payout = payout; 
+            let _ = account_to_write.try_serialize(&mut betkey.as_mut());
+        }
+    }
 }

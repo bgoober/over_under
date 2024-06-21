@@ -58,10 +58,12 @@ impl<'info> BetC<'info> {
             amount,
             bet: bet,
             round,
+            payout: 0,
             bump: *bumps.get("bet").unwrap(),
         });
 
-        self.round.bets.push(self.bet.key());  
+        self.round.bets.push(self.bet.key());
+
         Ok(())
     }
 }

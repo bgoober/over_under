@@ -9,3 +9,7 @@ pub use place_bet::*;
 
 pub mod play_round;
 pub use play_round::*;
+
+pub mod pay;
+pub use pay::*;
+

@@ -49,4 +49,9 @@ pub mod over_under {
         ctx.accounts.payout()?;
         Ok(())
     }
+
+    pub fn resolve_round(ctx: Context<CloseRoundC>) -> Result<()> {
+        ctx.accounts.close_round()?;
+        Ok(())
+    }
 }

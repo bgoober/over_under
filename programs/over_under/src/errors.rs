@@ -32,4 +32,6 @@ pub enum Error {
     Ed25519DataLength,
     #[msg("Round Already Played")]
     RoundAlreadyPlayed,
+    #[msg("Round Still Ongoing")]
+    RoundStillOngoing,
 }

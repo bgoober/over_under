@@ -13,3 +13,5 @@ pub use play_round::*;
 pub mod payout;
 pub use payout::*;
 
+pub mod close_round;
+pub use close_round::*;

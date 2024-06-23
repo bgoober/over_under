@@ -1,11 +1,10 @@
-use std::{collections::BTreeMap, fmt::LowerHex};
+use std::collections::BTreeMap;
 
 use anchor_instruction_sysvar::Ed25519InstructionSignatures;
 use anchor_lang::
     prelude::*
 ;
-use anchor_spl::token_2022::spl_token_2022::solana_zk_token_sdk::encryption::pedersen::H;
-use solana_program::{msg,
+use solana_program::{
     ed25519_program, hash::hash, sysvar::instructions::load_instruction_at_checked,
 };
 

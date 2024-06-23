@@ -40,7 +40,7 @@ impl Round {
         s.extend_from_slice(&[self.number, self.bump, self.outcome]);
         // iterate the vec of pubkeys and send to le bytes
         for bet in self.bets.iter() {
-            s.extend_from_slice(&bet.as_ref());
+            s.extend_from_slice(&bet.to_bytes());
         }
         s        
     }

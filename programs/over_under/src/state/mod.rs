@@ -26,9 +26,10 @@ impl Global {
 pub struct Round {
     pub round: u64, // the round number
     pub number: u8, // the random number of the round
-    pub bets: Vec<Pubkey>, // the players that placed a bet in the round
-    pub outcome: u8, // the outcome of the user's bet vs the number drawn. evaluated and updated in resolve round
     pub bump: u8, // the bump used to generate the round PDA
+    pub outcome: u8, // the outcome of the user's bet vs the number drawn. evaluated and updated in resolve round
+    pub bets: Vec<Pubkey>, // the players that placed a bet in the round
+
 }
 
 impl Round { 
@@ -36,8 +37,11 @@ impl Round {
 
     pub fn to_slice(&self) -> Vec<u8> {
         let mut s = self.round.to_le_bytes().to_vec();
-        s.extend_from_slice(&self.number.to_le_bytes());
-        s.extend_from_slice(&self.bump.to_le_bytes());
+        s.extend_from_slice(&[self.number, self.bump, self.outcome]);
+        // iterate the vec of pubkeys and send to le bytes
+        for bet in self.bets.iter() {
+            s.extend_from_slice(&bet.as_ref());
+        }
         s        
     }
 }

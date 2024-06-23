@@ -37,7 +37,6 @@ impl Round {
     pub fn to_slice(&self) -> Vec<u8> {
         let mut s = self.round.to_le_bytes().to_vec();
         s.extend_from_slice(&self.number.to_le_bytes());
-        s.extend_from_slice(&self.outcome.to_le_bytes());
         s.extend_from_slice(&self.bump.to_le_bytes());
         s        
     }

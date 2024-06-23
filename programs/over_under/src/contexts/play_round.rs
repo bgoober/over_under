@@ -1,10 +1,11 @@
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, fmt::LowerHex};
 
 use anchor_instruction_sysvar::Ed25519InstructionSignatures;
 use anchor_lang::
     prelude::*
 ;
-use solana_program::{
+use anchor_spl::token_2022::spl_token_2022::solana_zk_token_sdk::encryption::pedersen::H;
+use solana_program::{msg,
     ed25519_program, hash::hash, sysvar::instructions::load_instruction_at_checked,
 };
 
@@ -85,7 +86,7 @@ impl<'info> PlayRoundC<'info> {
                 .message
                 .as_ref()
                 .ok_or(Error::Ed25519Signature)?
-                .eq(&self.round.to_slice()),
+                .eq(&self.round.to_slice()), // making comparison of the round slice to the message signature
             Error::Ed25519Signature
         );
 
@@ -93,16 +94,7 @@ impl<'info> PlayRoundC<'info> {
     }
 
     pub fn play_round(&mut self, _bumps: &BTreeMap<String, u8>, sig: &[u8]) -> Result<()> {
-        let roll = self.calculate_roll(sig);
-        self.round.number = roll;
-        self.update_round_outcome();
-        self.update_global_state();
-        self.calculate_winners();
 
-        Ok(())
-    }
-
-    pub fn calculate_roll(&self, sig: &[u8]) -> u8 {
         let hash = hash(sig).to_bytes();
         let mut hash_16: [u8; 16] = [0; 16];
         hash_16.copy_from_slice(&hash[0..16]);
@@ -111,9 +103,17 @@ impl<'info> PlayRoundC<'info> {
         let upper = u128::from_le_bytes(hash_16);
 
         // produce a number 0-100
-        lower.wrapping_add(upper).wrapping_rem(101) as u8
-    }
+        let roll = lower.wrapping_add(upper).wrapping_rem(101) as u8;
+        
+        self.round.number = roll;
 
+        self.update_round_outcome();
+        self.update_global_state();
+        self.calculate_winners();
+
+        Ok(())
+    }
+    
     pub fn update_round_outcome(&mut self) {
         if self.round.number > self.global.number {
             self.round.outcome = 1;

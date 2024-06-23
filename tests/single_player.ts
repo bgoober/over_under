@@ -1,18 +1,26 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program, web3 } from "@coral-xyz/anchor";
 import { OverUnder } from "../target/types/over_under";
-import { Transaction, Ed25519Program, Keypair, PublicKey, SystemProgram, LAMPORTS_PER_SOL, SYSVAR_INSTRUCTIONS_PUBKEY, sendAndConfirmTransaction } from "@solana/web3.js";
+import {
+  Transaction,
+  Ed25519Program,
+  Keypair,
+  PublicKey,
+  SystemProgram,
+  LAMPORTS_PER_SOL,
+  SYSVAR_INSTRUCTIONS_PUBKEY,
+  sendAndConfirmTransaction,
+} from "@solana/web3.js";
 import BN from "bn.js";
 
 // use my local keypair for signing
-import wallet from "/home/agent/.config/solana/id.json"
+import wallet from "/home/agent/.config/solana/id.json";
 
 // Get the keypair from the wallet
-const keypair = Keypair.fromSecretKey(new Uint8Array(wallet))
+const keypair = Keypair.fromSecretKey(new Uint8Array(wallet));
 
 // Get the public key of the wallet
-const pubkey  = keypair.publicKey.toBase58()
-
+const pubkey = keypair.publicKey.toBase58();
 
 describe("over_under", () => {
   // Configure the client to use the local cluster.
@@ -116,15 +124,14 @@ describe("over_under", () => {
       .rpc();
     console.log("Your transaction signature", tx);
 
- 
     // fetch the bet
     const betAccount = await program.account.bet.fetch(bet);
     console.log(`bet amount: ${betAccount}`, betAccount.amount.toString());
-    console.log('bet: ${betAccount}', betAccount.bet.toString())
+    console.log("bet: ${betAccount}", betAccount.bet.toString());
   });
 
   // play_round
-  it("Round played!", async () => {   
+  it("Round played!", async () => {
     // Fetch the global account
     const globalAccount = await program.account.global.fetch(global);
 
@@ -149,42 +156,41 @@ describe("over_under", () => {
       globalAccount.round.toString()
     );
 
-
     const [bet] = web3.PublicKey.findProgramAddressSync(
       [Buffer.from("bet"), round.toBuffer(), house.toBuffer()],
       program.programId
     );
 
-    let account = await anchor.getProvider().connection.getAccountInfo(round, "confirmed");
+    let account = await anchor
+      .getProvider()
+      .connection.getAccountInfo(round, "confirmed");
     let sig_ix = Ed25519Program.createInstructionWithPrivateKey({
       privateKey: keypair.secretKey,
-      message: account.data.subarray(8)
+      message: account.data.subarray(8),
     });
 
-    const resolve_ix = await program.methods.playRound(Buffer.from(sig_ix.data.buffer.slice(16+32, 16+32+64))).accounts({
+    const resolve_ix = await program.methods
+      .playRound(Buffer.from(sig_ix.data.buffer.slice(16 + 32, 16 + 32 + 64)))
+      .accounts({
         house,
-        round,
         global,
-        vault,
         bet,
+        round,
+        vault,
         instructionSysvar: SYSVAR_INSTRUCTIONS_PUBKEY,
-        systemProgram:SystemProgram.programId 
-      }
-    )
-    .instruction();
+        systemProgram: SystemProgram.programId,
+      })
+      .instruction();
 
     const tx = new Transaction().add(sig_ix).add(resolve_ix);
 
     try {
-      await sendAndConfirmTransaction(
-        program.provider.connection,
-        tx,
-        [keypair]
-      );
+      await sendAndConfirmTransaction(program.provider.connection, tx, [
+        keypair,
+      ]);
     } catch (error) {
       console.error(error);
-      throw (error)
+      throw error;
     }
-    
   });
 });

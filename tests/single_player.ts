@@ -19,14 +19,12 @@ import wallet from "/home/agent/.config/solana/id.json";
 // Get the keypair from the wallet
 const keypair = Keypair.fromSecretKey(new Uint8Array(wallet));
 
-
 describe("over_under", () => {
   // Configure the client to use the local cluster.
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
   const connection = provider.connection;
   const program = anchor.workspace.OverUnder as Program<OverUnder>;
-
 
   const confirm = async (signature: string): Promise<string> => {
     const block = await connection.getLatestBlockhash();
@@ -131,7 +129,14 @@ describe("over_under", () => {
 
     const tx = await program.methods
       .placeBet(amountBN, 1, roundNumberBN) // Use BN objects for the first and third arguments
-      .accounts({ house: keypair.publicKey, global, round, vault, bet, player: keypair.publicKey})
+      .accounts({
+        house: keypair.publicKey,
+        global,
+        round,
+        vault,
+        bet,
+        player: keypair.publicKey,
+      })
       .signers([keypair])
       .rpc()
       .then(confirm)
@@ -199,13 +204,56 @@ describe("over_under", () => {
 
     const tx = new Transaction().add(sig_ix).add(resolve_ix);
 
-    try {
-      await sendAndConfirmTransaction(program.provider.connection, tx, [
-        keypair,
-      ]);
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
+    await sendAndConfirmTransaction(program.provider.connection, tx, [keypair]).then(log);
+  });
+
+  it("Payed Out!", async () => {
+      // Fetch the global account
+      const globalAccount = await program.account.global.fetch(global);
+
+      const _roundBN = new BN(globalAccount.round.toString());
+
+      // Convert to 8-byte Buffer in little-endian for other operations
+      const _roundBuffer = _roundBN.toArrayLike(Buffer, "le", 8);
+
+      const [round] = web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("round"), global.toBuffer(), _roundBuffer],
+        program.programId
+      );
+  
+      const [vault] = web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("vault"), round.toBuffer()],
+        program.programId
+      );
+      const roundAccount = await program.account.round.fetch(round);
+      console.log(`round: ${roundAccount}`, roundAccount.round.toString());
+  
+      console.log(
+        `global round: ${globalAccount}`,
+        globalAccount.round.toString()
+      );
+  
+      const [bet] = web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("bet"), round.toBuffer(), keypair.publicKey.toBuffer()],
+        program.programId
+      );
+
+      const tx = await program.methods
+      .payout() // Use BN objects for the first and third arguments
+      .accounts({
+        house: keypair.publicKey,
+        global,
+        round,
+        vault,
+        bet,
+        player: keypair.publicKey,
+        systemProgram: SystemProgram.programId,
+      })
+      .signers([keypair])
+      .rpc()
+      .then(confirm)
+      .then(log);
+    console.log("Your transaction signature", tx);
+
   });
 });

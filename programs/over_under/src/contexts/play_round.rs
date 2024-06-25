@@ -94,13 +94,15 @@ impl<'info> PlayRoundC<'info> {
         msg!("Round to slice line 94: {:?}", self.round.to_slice());
         msg!("Round to slice length line 95: {:?}", self.round.to_slice().len());
 
+        // let round_len = self.round.to_slice().len();
+
         // Ensure messages match
         require!(
             &signature
                 .message
                 .as_ref()
                 .ok_or(Error::Ed25519Signature)?
-                .eq(&self.round.to_slice()), // making comparison of the round slice to the message signature
+                .starts_with(&self.round.to_slice()), // making comparison of the round slice to the message signature
             Error::Ed25519Signature
         );
 

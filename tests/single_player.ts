@@ -24,7 +24,21 @@ const pubkey = keypair.publicKey.toBase58();
 
 describe("over_under", () => {
   // Configure the client to use the local cluster.
-  anchor.setProvider(anchor.AnchorProvider.env());
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
+  const connection = provider.connection;
+  const keypair = Keypair.fromSecretKey(new Uint8Array(wallet));
+
+  const confirm = async (signature: string): Promise<string> => {
+    const block = await connection.getLatestBlockhash();
+    await connection.confirmTransaction({ signature, ...block });
+    return signature;
+  };
+
+  const log = async (signature: string): Promise<string> => {
+    console.log(signature);
+    return signature;
+  };
 
   const program = anchor.workspace.OverUnder as Program<OverUnder>;
 
@@ -69,7 +83,9 @@ describe("over_under", () => {
     const tx = await program.methods
       .initRound(_roundBN)
       .accounts({ house, global, round, vault })
-      .rpc();
+      .rpc()
+      .then(confirm)
+      .then(log);
     console.log("Your transaction signature", tx);
 
     // Fetch the round account
@@ -121,7 +137,9 @@ describe("over_under", () => {
     const tx = await program.methods
       .placeBet(amountBN, 1, roundNumberBN) // Use BN objects for the first and third arguments
       .accounts({ house, global, round, vault, bet })
-      .rpc();
+      .rpc()
+      .then(confirm)
+      .then(log);
     console.log("Your transaction signature", tx);
 
     // fetch the bet

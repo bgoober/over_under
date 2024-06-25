@@ -37,11 +37,12 @@ pub mod over_under {
     pub fn play_round(ctx: Context<PlayRoundC>, sig: Vec<u8>) -> Result<()> {
         // Verify the provided signature
         ctx.accounts.verify_ed25519_signature(&sig)?;
+        msg!("Signature: {:?}", sig);
 
         // Play the round, which calculates the roll, updates the round number,
         // the outcome of the round, and updates global state
         ctx.accounts.play_round(&ctx.bumps, &sig)?;
-
+        msg!("play_round Signature: {:?}", sig);
         Ok(())
     }
 

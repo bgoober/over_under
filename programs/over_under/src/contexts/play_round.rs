@@ -62,6 +62,9 @@ impl<'info> PlayRoundC<'info> {
 
         require_eq!(signatures.len(), 1, Error::Ed25519DataLength);
         let signature = &signatures[0];
+        // print the signature
+        msg!("Signature line 66: {:?}", signature);
+        msg!("Signature length line 67: {:?}", signatures.len());
 
         // Make sure all the data is present to verify the signature
         require!(signature.is_verifiable, Error::Ed25519Header);
@@ -72,12 +75,24 @@ impl<'info> PlayRoundC<'info> {
             self.house.key(),
             Error::Ed25519Pubkey
         );
+        // print the signature.public key and house key 
+        msg!("Signature Public Key line 78: {:?}", signature.public_key);
+        msg!("House Key line 79: {:?}", self.house.key());
 
         // Ensure signatures match
         require!(
             &signature.signature.ok_or(Error::Ed25519Signature)?.eq(sig),
             Error::Ed25519Signature
         );
+        // print the signature
+        msg!("Signature line 87: {:?}", signature.signature);
+        // print sig
+        msg!("Sig line 89: {:?}", sig);
+
+        msg!("Signature message line 92: {:?}", signature.message);
+        msg!("Signature message length line 93: {:?}", signature.message.as_ref().unwrap().len());
+        msg!("Round to slice line 94: {:?}", self.round.to_slice());
+        msg!("Round to slice length line 95: {:?}", self.round.to_slice().len());
 
         // Ensure messages match
         require!(

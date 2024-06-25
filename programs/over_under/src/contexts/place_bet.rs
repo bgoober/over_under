@@ -56,7 +56,7 @@ impl<'info> BetC<'info> {
         self.bet.set_inner(Bet {
             player: self.player.key(),
             amount,
-            bet: bet,
+            bet,
             round,
             payout: 0,
             bump: *bumps.get("bet").unwrap(),

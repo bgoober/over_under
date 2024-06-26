@@ -51,7 +51,7 @@ pub mod over_under {
         Ok(())
     }
 
-    pub fn resolve_round(ctx: Context<CloseRoundC>) -> Result<()> {
+    pub fn close_round(ctx: Context<CloseRoundC>) -> Result<()> {
         ctx.accounts.close_round()?;
         Ok(())
     }

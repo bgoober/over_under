@@ -1,9 +1,7 @@
 use std::collections::BTreeMap;
 
 use anchor_instruction_sysvar::Ed25519InstructionSignatures;
-use anchor_lang::
-    prelude::*
-;
+use anchor_lang::prelude::*;
 use solana_program::{
     ed25519_program, hash::hash, sysvar::instructions::load_instruction_at_checked,
 };
@@ -62,9 +60,6 @@ impl<'info> PlayRoundC<'info> {
 
         require_eq!(signatures.len(), 1, Error::Ed25519DataLength);
         let signature = &signatures[0];
-        // print the signature
-        msg!("Signature line 66: {:?}", signature);
-        msg!("Signature length line 67: {:?}", signatures.len());
 
         // Make sure all the data is present to verify the signature
         require!(signature.is_verifiable, Error::Ed25519Header);
@@ -75,26 +70,13 @@ impl<'info> PlayRoundC<'info> {
             self.house.key(),
             Error::Ed25519Pubkey
         );
-        // print the signature.public key and house key 
-        msg!("Signature Public Key line 78: {:?}", signature.public_key);
-        msg!("House Key line 79: {:?}", self.house.key());
+
 
         // Ensure signatures match
         require!(
             &signature.signature.ok_or(Error::Ed25519Signature)?.eq(sig),
             Error::Ed25519Signature
         );
-        // print the signature
-        msg!("Signature line 87: {:?}", signature.signature);
-        // print sig
-        msg!("Sig line 89: {:?}", sig);
-
-        msg!("Signature message line 92: {:?}", signature.message);
-        msg!("Signature message length line 93: {:?}", signature.message.as_ref().unwrap().len());
-        msg!("Round to slice line 94: {:?}", self.round.to_slice());
-        msg!("Round to slice length line 95: {:?}", self.round.to_slice().len());
-
-        // let round_len = self.round.to_slice().len();
 
         // Ensure messages match
         require!(
@@ -110,6 +92,9 @@ impl<'info> PlayRoundC<'info> {
     }
 
     pub fn play_round(&mut self, _bumps: &BTreeMap<String, u8>, sig: &[u8]) -> Result<()> {
+        // if self.round.bets.len() == 0 {
+        //     return Err(Error::NoBetsInRound.into());
+        // }
 
         let hash = hash(sig).to_bytes();
         let mut hash_16: [u8; 16] = [0; 16];
@@ -120,53 +105,49 @@ impl<'info> PlayRoundC<'info> {
 
         // produce a number 0-100
         let roll = lower.wrapping_add(upper).wrapping_rem(101) as u8;
-        
+
+        msg!("Roll: {:?}", roll);
+
         self.round.number = roll;
 
-        self.update_round_outcome();
-        self.update_global_state();
-        self.calculate_winners();
-
-        Ok(())
-    }
-    
-    pub fn update_round_outcome(&mut self) {
-        if self.round.number > self.global.number {
-            self.round.outcome = 1;
-        } else if self.round.number < self.global.number {
-            self.round.outcome = 0;
-        } else {
-            self.round.outcome = 2;
-        }
-    }
-
-    pub fn update_global_state(&mut self) {
-        self.global.number = self.round.number;
-        self.global.round += 1;
-    }
-
-    pub fn calculate_winners(&mut self) {
-        // Step 1: Collect necessary changes without mutating `self.round`
-        let mut total_winners_pot = 0;
-        let mut winner_accounts = Vec::new();
-
-        let vault = self.vault.lamports();
-
-        for betkey in &self.round.bets {
-            let account_to_write =
-                Bet::try_deserialize(&mut betkey.as_ref()).expect("Error Deserializing Data");
-            if account_to_write.bet == self.round.outcome {
-                total_winners_pot += account_to_write.amount;
-                winner_accounts.push((betkey.clone(), account_to_write)); // Collect winners to update later
+        {
+            if self.round.number > self.global.number {
+                self.round.outcome = 1;
+                self.global.number = roll;
+            } else if self.round.number < self.global.number {
+                self.round.outcome = 0;
+                self.global.number = roll;
+            } else {
+                self.round.outcome = 2;
+                self.global.number = roll;
             }
         }
 
-        // Step 2: Apply collected changes
-        for (mut betkey, mut account_to_write) in winner_accounts {
+        self.global.round += 1;
 
-            let payout = (account_to_write.amount / total_winners_pot) * vault;
-            account_to_write.payout = payout; 
-            let _ = account_to_write.try_serialize(&mut betkey.as_mut());
+        {
+            // Step 1: Collect necessary changes without mutating `self.round`
+            let mut total_winners_pot = 0;
+            let mut winner_accounts = Vec::new();
+
+            let vault = self.vault.lamports();
+
+            for betkey in &self.round.bets {
+                let account_to_write =
+                    Bet::try_deserialize(&mut betkey.as_ref()).expect("Error Deserializing Data");
+                if account_to_write.bet == self.round.outcome {
+                    total_winners_pot += account_to_write.amount;
+                    winner_accounts.push((betkey.clone(), account_to_write)); // Collect winners to update later
+                }
+            }
+
+            // Step 2: Apply collected changes
+            for (mut betkey, mut account_to_write) in winner_accounts {
+                let payout = (account_to_write.amount / total_winners_pot) * vault;
+                account_to_write.payout = payout;
+                let _ = account_to_write.try_serialize(&mut betkey.as_mut());
+            }
+            Ok(())
         }
     }
 }

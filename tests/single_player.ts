@@ -204,41 +204,47 @@ describe("over_under", () => {
 
     const tx = new Transaction().add(sig_ix).add(resolve_ix);
 
-    await sendAndConfirmTransaction(program.provider.connection, tx, [keypair]).then(log);
+    await sendAndConfirmTransaction(program.provider.connection, tx, [
+      keypair,
+    ]).then(log);
   });
 
   it("Payed Out!", async () => {
-      // Fetch the global account
-      const globalAccount = await program.account.global.fetch(global);
+    // Fetch the global account
+    const globalAccount = await program.account.global.fetch(global);
 
-      const _roundBN = new BN(globalAccount.round.toString());
+    console.log("global number: ", globalAccount.number.toString());
 
-      // Convert to 8-byte Buffer in little-endian for other operations
-      const _roundBuffer = _roundBN.toArrayLike(Buffer, "le", 8);
+    const _roundBN = new BN(globalAccount.round.toString());
 
-      const [round] = web3.PublicKey.findProgramAddressSync(
-        [Buffer.from("round"), global.toBuffer(), _roundBuffer],
-        program.programId
-      );
-  
-      const [vault] = web3.PublicKey.findProgramAddressSync(
-        [Buffer.from("vault"), round.toBuffer()],
-        program.programId
-      );
-      const roundAccount = await program.account.round.fetch(round);
-      console.log(`round: ${roundAccount}`, roundAccount.round.toString());
-  
-      console.log(
-        `global round: ${globalAccount}`,
-        globalAccount.round.toString()
-      );
-  
-      const [bet] = web3.PublicKey.findProgramAddressSync(
-        [Buffer.from("bet"), round.toBuffer(), keypair.publicKey.toBuffer()],
-        program.programId
-      );
+    // Convert to 8-byte Buffer in little-endian for other operations
+    const _roundBuffer = _roundBN.toArrayLike(Buffer, "le", 8);
 
-      const tx = await program.methods
+    const [round] = web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("round"), global.toBuffer(), _roundBuffer],
+      program.programId
+    );
+
+    const [vault] = web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("vault"), round.toBuffer()],
+      program.programId
+    );
+    const roundAccount = await program.account.round.fetch(round);
+    console.log(`round: ${roundAccount}`, roundAccount.round.toString());
+
+    console.log(
+      `global round: ${globalAccount}`,
+      globalAccount.round.toString()
+    );
+    // log the global.number
+    console.log(`global number: ${globalAccount}`, globalAccount.number.toString());
+
+    const [bet] = web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("bet"), round.toBuffer(), keypair.publicKey.toBuffer()],
+      program.programId
+    );
+
+    const tx = await program.methods
       .payout() // Use BN objects for the first and third arguments
       .accounts({
         house: keypair.publicKey,
@@ -254,6 +260,37 @@ describe("over_under", () => {
       .then(confirm)
       .then(log);
     console.log("Your transaction signature", tx);
+  });
 
+  it("Round is Closed!", async () => {
+    // fetch global
+    const globalAccount = await program.account.global.fetch(global);
+
+    console.log("global number: ", globalAccount.number.toString());
+    console.log("global round: ", globalAccount.round.toString());
+
+    const _roundBN = new BN(globalAccount.round.toString());
+
+    // Convert to 8-byte Buffer in little-endian for other operations
+    const _roundBuffer = _roundBN.toArrayLike(Buffer, "le", 8);
+
+    const [round] = web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("round"), global.toBuffer(), _roundBuffer],
+      program.programId
+    );
+
+    const tx = await program.methods
+      .closeRound() // Use BN objects for the first and third arguments
+      .accounts({
+        house: keypair.publicKey,
+        global,
+        round,
+        systemProgram: SystemProgram.programId,
+      })
+      .signers([keypair])
+      .rpc()
+      .then(confirm)
+      .then(log);
+    console.log("Your transaction signature", tx);
   });
 });

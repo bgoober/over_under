@@ -34,7 +34,7 @@ pub struct CloseRoundC<'info> {
 impl<'info> CloseRoundC<'info> {
     pub fn close_round(&mut self) -> Result<()> {
         // check if the self.round.outcome is 3, or if the self.round.bets.len() is 0, or the self.round.number is 101, and if any of these are true, return an error that the round is still ongoing and can't be closed, else close the round
-        if self.round.outcome == 3 || self.round.bets.len() == 0 || self.round.number == 101 {
+        if self.round.outcome == 3 || self.round.number == 101 {
             return Err(Error::RoundStillOngoing.into());
         } else {
             self.round.close(self.house.to_account_info())?;

@@ -21,7 +21,7 @@ pub struct PayC<'info> {
     )]
     pub global: Box<Account<'info, Global>>,
 
-    #[account(mut, close = house,
+    #[account(mut,
         seeds = [b"round", global.key().as_ref(), global.round.to_le_bytes().as_ref()],
         bump
     )]

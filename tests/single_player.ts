@@ -19,6 +19,8 @@ import wallet from "/home/agent/.config/solana/id.json";
 // Get the keypair from the wallet
 const keypair = Keypair.fromSecretKey(new Uint8Array(wallet));
 
+// derive account addresses up here or under describe but before a test
+
 describe("over_under", () => {
   // Configure the client to use the local cluster.
   const provider = anchor.AnchorProvider.env();
@@ -45,7 +47,6 @@ describe("over_under", () => {
   it("Global initialized!", async () => {
     // Add your test here.
     const tx = await program.methods.initGlobal().accounts({ global }).rpc();
-    console.log("Your transaction signature", tx);
   });
 
   // initRound
@@ -79,7 +80,6 @@ describe("over_under", () => {
       .rpc()
       .then(confirm)
       .then(log);
-    console.log("Your transaction signature", tx);
 
     // Fetch the round account
     const roundAccount = await program.account.round.fetch(round);
@@ -141,12 +141,16 @@ describe("over_under", () => {
       .rpc()
       .then(confirm)
       .then(log);
-    console.log("Your transaction signature", tx);
 
     // fetch the bet
     const betAccount = await program.account.bet.fetch(bet);
+    const roundAccount2 = await program.account.round.fetch(round);
     console.log(`bet amount: ${betAccount}`, betAccount.amount.toString());
     console.log("bet: ${betAccount}", betAccount.bet.toString());
+    // log the round.bets length
+    console.log(`round2 bets length: ${roundAccount2}`, roundAccount2.bets.length);
+    console.log("round2 bets: ", roundAccount2.bets);
+
   });
 
   // play_round
@@ -180,6 +184,8 @@ describe("over_under", () => {
       program.programId
     );
 
+    console.log("test1");
+
     let account = await anchor
       .getProvider()
       .connection.getAccountInfo(round, "confirmed");
@@ -187,6 +193,8 @@ describe("over_under", () => {
       privateKey: keypair.secretKey,
       message: account.data.subarray(8),
     });
+
+    console.log("test2");
 
     const resolve_ix = await program.methods
       .playRound(Buffer.from(sig_ix.data.buffer.slice(16 + 32, 16 + 32 + 64)))
@@ -202,11 +210,27 @@ describe("over_under", () => {
       })
       .instruction();
 
+    console.log("test3");
     const tx = new Transaction().add(sig_ix).add(resolve_ix);
 
-    await sendAndConfirmTransaction(program.provider.connection, tx, [
-      keypair,
-    ]).then(log);
+    console.log("test4");
+
+    await sendAndConfirmTransaction(program.provider.connection, tx, [keypair])
+      .then(log)
+      .catch((error) => console.error("Transaction # Error:", error));
+
+    // await sendAndConfirmTransaction(program.provider.connection, tx, [
+    //   keypair,
+    // ]).then(log);
+    // console.log("ROUND PLAYED TX SUCCESSFUL");
+
+    console.log("test5");
+
+    // fetch global
+    const globalAccount2 = await program.account.global.fetch(global);
+    console.log("global number: ", globalAccount2.number.toString());
+    console.log("global round: ", globalAccount2.round.toString());
+    console.log("round bets: ", roundAccount.bets);
   });
 
   it("Payed Out!", async () => {
@@ -237,7 +261,10 @@ describe("over_under", () => {
       globalAccount.round.toString()
     );
     // log the global.number
-    console.log(`global number: ${globalAccount}`, globalAccount.number.toString());
+    console.log(
+      `global number: ${globalAccount}`,
+      globalAccount.number.toString()
+    );
 
     const [bet] = web3.PublicKey.findProgramAddressSync(
       [Buffer.from("bet"), round.toBuffer(), keypair.publicKey.toBuffer()],
@@ -259,7 +286,6 @@ describe("over_under", () => {
       .rpc()
       .then(confirm)
       .then(log);
-    console.log("Your transaction signature", tx);
   });
 
   it("Round is Closed!", async () => {
@@ -291,6 +317,5 @@ describe("over_under", () => {
       .rpc()
       .then(confirm)
       .then(log);
-    console.log("Your transaction signature", tx);
   });
 });

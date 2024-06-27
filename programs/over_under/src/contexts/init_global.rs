@@ -10,7 +10,7 @@ pub struct GlobalC<'info> {
 
     // global
     #[account(init_if_needed, payer = house, seeds = [b"global", house.key().as_ref()], space = Global::LEN, bump)]
-    pub global: Box<Account<'info, Global>>,
+    pub global: Account<'info, Global>,
 
     // system program
     pub system_program: Program<'info, System>,

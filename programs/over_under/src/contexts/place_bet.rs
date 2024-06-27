@@ -28,19 +28,19 @@ pub struct BetC<'info> {
         seeds = [b"global", house.key().as_ref()],
         bump
     )]
-    pub global: Box<Account<'info, Global>>,
+    pub global: Account<'info, Global>,
     
     // round the player is placing a bet in,
     #[account(seeds = [b"round", global.key().as_ref(), global.round.to_le_bytes().as_ref()], bump)]
-    pub round: Box<Account<'info, Round>>,
+    pub round: Account<'info, Round>,
 
     // vault pda of the round account
     #[account(mut, seeds = [b"vault", round.key().as_ref()], bump)]
     pub vault: SystemAccount<'info>,
 
     // bet account to store the bet which is a pda of the round account
-    #[account(init, payer = player, seeds = [b"bet", round.key().as_ref(), player.key().as_ref()], space = Bet::LEN, bump)]
-    pub bet: Box<Account<'info, Bet>>,
+    #[account(init_if_needed, payer = player, seeds = [b"bet", round.key().as_ref(), player.key().as_ref()], space = Bet::LEN, bump)]
+    pub bet: Account<'info, Bet>,
 
     // system program to transfer SOL
     pub system_program: Program<'info, System>,
@@ -62,7 +62,26 @@ impl<'info> BetC<'info> {
             bump: *bumps.get("bet").unwrap(),
         });
 
-        self.round.bets.push(self.bet.key());
+        // print the round.bets vector
+        msg!(&format!("66 - round.bets.len(): {:#?}", self.round.bets));
+
+        let betkey = self.bet.key();
+
+        let mut round_bets = self.round.bets.to_vec();
+
+        round_bets.push(betkey);
+
+        self.round.bets = round_bets;
+        msg!(&format!("75 - round.bets.len(): {:#?}", self.round.bets));
+
+
+        msg!("bet.player {}", self.bet.player);
+        msg!("bet.amount {}", self.bet.amount);
+        msg!("bet.bet {}", self.bet.bet);
+        msg!("bet.round {}", self.bet.round);
+        msg!("bet.payout {}", self.bet.payout);
+        msg!("round.bets.len(): {}", self.round.bets.len());
+    
 
         Ok(())
     }

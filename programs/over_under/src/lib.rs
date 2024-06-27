@@ -11,7 +11,7 @@ use contexts::*;
 mod errors;
 mod state;
 
-declare_id!("4z3ZzM7rVH8D2mBuL81TuYBtAxMrWdDziKf8Z34tLxr");
+declare_id!("3qzsebktNn3EJCxjoCmmbHnu62x3ebGpKuyv5qBxLp8V");
 
 #[program]
 pub mod over_under {
@@ -35,6 +35,7 @@ pub mod over_under {
     }
 
     pub fn play_round(ctx: Context<PlayRoundC>, sig: Vec<u8>) -> Result<()> {
+        msg!("test play round instruction");
         // Verify the provided signature
         ctx.accounts.verify_ed25519_signature(&sig)?;
         msg!("Signature: {:?}", sig);

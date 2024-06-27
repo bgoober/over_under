@@ -18,14 +18,14 @@ pub struct CloseRoundC<'info> {
         seeds = [b"global", house.key().as_ref()],
         bump
     )]
-    pub global: Box<Account<'info, Global>>,
+    pub global: Account<'info, Global>,
 
     // round to close
     #[account(mut, close = house,
         seeds = [b"round", global.key().as_ref(), global.round.to_le_bytes().as_ref()],
         bump
     )]
-    pub round: Box<Account<'info, Round>>,
+    pub round: Account<'info, Round>,
 
     // system program
     pub system_program: Program<'info, System>,

@@ -24,12 +24,11 @@ impl Global {
 
 #[account]
 pub struct Round {
-    pub round: u64, // the round number
+    pub round: u64, // the round number 
     pub number: u8, // the random number of the round
     pub bump: u8, // the bump used to generate the round PDA
     pub outcome: u8, // the outcome of the user's bet vs the number drawn. evaluated and updated in resolve round
     pub bets: Vec<Pubkey>, // the players that placed a bet in the round
-
 }
 
 impl Round { 

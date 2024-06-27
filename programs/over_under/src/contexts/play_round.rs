@@ -25,14 +25,14 @@ pub struct PlayRoundC<'info> {
         seeds = [b"global", house.key().as_ref()],
         bump
     )]
-    pub global: Box<Account<'info, Global>>,
+    pub global: Account<'info, Global>,
 
     #[account(mut)]
-    pub bet: Box<Account<'info, Bet>>,
+    pub bet: Account<'info, Bet>,
 
     // round the player is placing a bet in,
     #[account(seeds = [b"round", global.key().as_ref(), global.round.to_le_bytes().as_ref()], bump)]
-    pub round: Box<Account<'info, Round>>,
+    pub round: Account<'info, Round>,
 
     // vault pda of the round account
     #[account(mut, seeds = [b"vault", round.key().as_ref()], bump)]
@@ -71,7 +71,6 @@ impl<'info> PlayRoundC<'info> {
             Error::Ed25519Pubkey
         );
 
-
         // Ensure signatures match
         require!(
             &signature.signature.ok_or(Error::Ed25519Signature)?.eq(sig),
@@ -92,61 +91,68 @@ impl<'info> PlayRoundC<'info> {
     }
 
     pub fn play_round(&mut self, _bumps: &BTreeMap<String, u8>, sig: &[u8]) -> Result<()> {
-        // if self.round.bets.len() == 0 {
-        //     return Err(Error::NoBetsInRound.into());
-        // }
+        msg!(&format!("round.bets.len(): {:#?}", self.round.bets));
+        if self.round.bets.len() == 0 {
+            return Err(Error::NoBetsInRound.into());
+        } else {
+            let hash = hash(sig).to_bytes();
+            let mut hash_16: [u8; 16] = [0; 16];
+            hash_16.copy_from_slice(&hash[0..16]);
+            let lower = u128::from_le_bytes(hash_16);
+            hash_16.copy_from_slice(&hash[16..32]);
+            let upper = u128::from_le_bytes(hash_16);
 
-        let hash = hash(sig).to_bytes();
-        let mut hash_16: [u8; 16] = [0; 16];
-        hash_16.copy_from_slice(&hash[0..16]);
-        let lower = u128::from_le_bytes(hash_16);
-        hash_16.copy_from_slice(&hash[16..32]);
-        let upper = u128::from_le_bytes(hash_16);
+            // produce a number 0-100
+            let roll = lower.wrapping_add(upper).wrapping_rem(101) as u8;
 
-        // produce a number 0-100
-        let roll = lower.wrapping_add(upper).wrapping_rem(101) as u8;
+            msg!("Roll: {:?}", roll);
 
-        msg!("Roll: {:?}", roll);
+            self.round.number = roll;
 
-        self.round.number = roll;
-
-        {
-            if self.round.number > self.global.number {
-                self.round.outcome = 1;
-                self.global.number = roll;
-            } else if self.round.number < self.global.number {
-                self.round.outcome = 0;
-                self.global.number = roll;
-            } else {
-                self.round.outcome = 2;
-                self.global.number = roll;
-            }
-        }
-
-        self.global.round += 1;
-
-        {
-            // Step 1: Collect necessary changes without mutating `self.round`
-            let mut total_winners_pot = 0;
-            let mut winner_accounts = Vec::new();
-
-            let vault = self.vault.lamports();
-
-            for betkey in &self.round.bets {
-                let account_to_write =
-                    Bet::try_deserialize(&mut betkey.as_ref()).expect("Error Deserializing Data");
-                if account_to_write.bet == self.round.outcome {
-                    total_winners_pot += account_to_write.amount;
-                    winner_accounts.push((betkey.clone(), account_to_write)); // Collect winners to update later
+            {
+                if self.round.number > self.global.number {
+                    self.round.outcome = 1; // number was higher
+                    self.global.number = roll;
+                } else if self.round.number < self.global.number {
+                    self.round.outcome = 0; // number was lower
+                    self.global.number = roll;
+                } else if self.round.number == self.global.number{
+                    self.round.outcome = 2; // number was the same
+                    self.global.number = roll;
                 }
             }
 
-            // Step 2: Apply collected changes
-            for (mut betkey, mut account_to_write) in winner_accounts {
-                let payout = (account_to_write.amount / total_winners_pot) * vault;
-                account_to_write.payout = payout;
-                let _ = account_to_write.try_serialize(&mut betkey.as_mut());
+            self.global.round += 1;
+
+            {
+                // Step 1: Collect necessary changes without mutating `self.round`
+                let mut total_winners_pot = 0;
+                let mut winner_accounts = Vec::new();
+
+                let vault = self.vault.lamports();
+
+                for betkey in &self.round.bets {
+                    let account_to_write = Bet::try_deserialize(&mut betkey.as_ref())
+                        .expect("Error Deserializing Data");
+                    if account_to_write.bet == self.round.outcome {
+                        total_winners_pot += account_to_write.amount;
+                        winner_accounts.push((betkey.clone(), account_to_write));
+                        // Collect winners to update later
+                    }
+                }
+
+                // Step 2: Apply collected changes
+                for (mut betkey, mut account_to_write) in winner_accounts {
+                    let payout = (account_to_write.amount / total_winners_pot) * vault;
+                    account_to_write.payout = payout;
+                    let _ = account_to_write.try_serialize(&mut betkey.as_mut());
+                }
             }
+            msg!("Round Outcome: {:?}", self.round.outcome);
+            msg!("Round Number: {:?}", self.round.number);
+            msg!("Global Number: {:?}", self.global.number);
+            msg!("Global Round: {:?}", self.global.round);
+
             Ok(())
         }
     }

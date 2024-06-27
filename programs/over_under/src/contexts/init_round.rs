@@ -23,11 +23,11 @@ pub struct RoundC<'info> {
         seeds = [b"global", house.key().as_ref()],
         bump
     )]
-    pub global: Box<Account<'info, Global>>,
+    pub global: Account<'info, Global>,
 
     // round pda of the global account
-    #[account(init, payer = thread, seeds = [b"round", global.key().as_ref(), _round.to_le_bytes().as_ref()], space = Round::LEN, bump)]
-    pub round: Box<Account<'info, Round>>,
+    #[account(init_if_needed, payer = thread, seeds = [b"round", global.key().as_ref(), _round.to_le_bytes().as_ref()], space = Round::LEN, bump)]
+    pub round: Account<'info, Round>,
 
     // vault pda of the round account
     #[account(seeds = [b"vault", round.key().as_ref()], bump)]
@@ -46,6 +46,12 @@ impl <'info> RoundC<'info> {
             bets: Vec::with_capacity(10),
             bump: *bumps.get("round").unwrap(),
         });
+
+        msg!("round.round: {}", self.round.round);
+        msg!("round.number: {}", self.round.number);
+        msg!("round.outcome: {}", self.round.outcome);
+        msg!("round.bets.len(): {}", self.round.bets.len());
+        
         Ok(())
     }
 }

@@ -47,7 +47,8 @@ describe("over_under", () => {
 
   it("Global initialized!", async () => {
     // Add your test here.
-    const tx = await program.methods.initGlobal().accounts({ global }).rpc();
+    const tx = await program.methods.initGlobal().accounts({ global }).rpc().then(confirm).then(log);
+
   });
 
   // initRound
@@ -55,7 +56,7 @@ describe("over_under", () => {
     const globalAccount = await program.account.global.fetch(global);
 
     console.log(
-      `global round: ${globalAccount}`,
+      `global round: `,
       globalAccount.round.toString()
     );
 
@@ -109,10 +110,10 @@ describe("over_under", () => {
       program.programId
     );
     const roundAccount = await program.account.round.fetch(round);
-    console.log(`round: ${roundAccount}`, roundAccount.round.toString());
+    console.log(`round: `, roundAccount.round.toString());
 
     console.log(
-      `global round: ${globalAccount}`,
+      `global round: `,
       globalAccount.round.toString()
     );
 
@@ -146,8 +147,8 @@ describe("over_under", () => {
     // fetch the bet
     const betAccount = await program.account.bet.fetch(bet);
     const roundAccount2 = await program.account.round.fetch(round);
-    console.log(`bet amount: ${betAccount}`, betAccount.amount.toString());
-    console.log("bet: ${betAccount}", betAccount.bet.toString());
+    console.log(`bet amount: `, betAccount.amount.toString());
+    console.log("bet: ", betAccount.bet.toString());
     // log the round.bets length
     console.log(
       `round2 bets length: ${roundAccount2}`,
@@ -175,10 +176,10 @@ describe("over_under", () => {
       program.programId
     );
     const roundAccount = await program.account.round.fetch(round);
-    console.log(`round: ${roundAccount}`, roundAccount.round.toString());
+    console.log(`round: `, roundAccount.round.toString());
 
     console.log(
-      `global round: ${globalAccount}`,
+      `global round: }`,
       globalAccount.round.toString()
     );
 
@@ -303,6 +304,13 @@ describe("over_under", () => {
       [Buffer.from("bet"), round.toBuffer(), keypair.publicKey.toBuffer()],
       program.programId
     );
+    // fetch the bet
+    const betAccount = await program.account.bet.fetch(bet);
+    console.log(`bet amount: `, betAccount.amount.toString());
+    console.log("bet bet: ", betAccount.bet.toString());
+    console.log("bet player: ", betAccount.player.toString());
+    console.log("bet round: ", betAccount.round.toString());
+    console.log("bet payout: ", betAccount.payout.toString());
 
     const tx = await program.methods
       .payout() // Use BN objects for the first and third arguments
@@ -315,7 +323,6 @@ describe("over_under", () => {
         player: keypair.publicKey,
         systemProgram: SystemProgram.programId,
       })
-      .signers([keypair])
       .rpc()
       .then(confirm)
       .then(log);
@@ -350,5 +357,10 @@ describe("over_under", () => {
       .rpc()
       .then(confirm)
       .then(log);
+
+    // fetch global
+    const globalAccount2 = await program.account.global.fetch(global);
+    console.log("global number: ", globalAccount2.number.toString());
+    console.log("global round: ", globalAccount2.round.toString());
   });
 });

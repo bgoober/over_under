@@ -26,7 +26,7 @@ pub struct RoundC<'info> {
     pub global: Account<'info, Global>,
 
     // round pda of the global account
-    #[account(init_if_needed, payer = thread, seeds = [b"round", global.key().as_ref(), _round.to_le_bytes().as_ref()], space = Round::LEN, bump)]
+    #[account(init, payer = thread, seeds = [b"round", global.key().as_ref(), _round.to_le_bytes().as_ref()], space = Round::LEN, bump)]
     pub round: Account<'info, Round>,
 
     // vault pda of the round account

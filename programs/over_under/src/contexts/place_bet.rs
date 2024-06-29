@@ -14,7 +14,6 @@ use crate::state::Global;
 use crate::errors::Error;
 
 #[derive(Accounts)]
-#[instruction(len: u16)]
 pub struct BetC<'info> {
     // player who is signer
     #[account(mut)]
@@ -39,7 +38,7 @@ pub struct BetC<'info> {
     pub vault: SystemAccount<'info>,
 
     // bet account to store the bet which is a pda of the round account
-    #[account(init_if_needed, payer = player, seeds = [b"bet", round.key().as_ref(), player.key().as_ref()], space = Bet::LEN, bump)]
+    #[account(init, payer = player, seeds = [b"bet", round.key().as_ref(), player.key().as_ref()], space = Bet::LEN, bump)]
     pub bet: Account<'info, Bet>,
 
     // system program to transfer SOL
@@ -73,8 +72,9 @@ impl<'info> BetC<'info> {
                 self.round.bets
             ));
 
-            let betkey = self.bet.key();
-            self.round.bets.push(betkey);
+            self.round.bets.push(self.bet.key());
+
+            self.round.players.push(self.bet.player.key());
 
             msg!(&format!(
                 "after push - round.bets.len(): {:#?}",

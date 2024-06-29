@@ -11,11 +11,11 @@ use crate::state::Global;
 #[derive(Accounts)]
 #[instruction(_round: u64)]
 pub struct RoundC<'info> {
-    // thread
-    #[account(mut, constraint = thread.key() == global.auth.key())]
+    // signer
+    #[account(mut, constraint = thread.key() == global.auth)]
     pub thread: Signer<'info>,
 
-    // the pubkey of the signer of init global
+    #[account()]
     pub house: SystemAccount<'info>,
 
     // global account which is a pda of the program ID and the house pubkey
@@ -44,6 +44,7 @@ impl <'info> RoundC<'info> {
             number: 101, 
             outcome: 3,
             bets: Vec::with_capacity(10),
+            players: Vec::with_capacity(10),
             bump: *bumps.get("round").unwrap(),
             vault_bump: *bumps.get("vault").unwrap(),
         });

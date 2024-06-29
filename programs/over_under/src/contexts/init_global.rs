@@ -4,12 +4,15 @@ use std::collections::BTreeMap;
 
 #[derive(Accounts)]
 pub struct GlobalC<'info> {
-    // house
+    // signer
     #[account(mut)]
-    pub house: Signer<'info>,
+    pub thread: Signer<'info>,
+
+    #[account()]
+    pub house: SystemAccount<'info>,
 
     // global
-    #[account(init, payer = house, seeds = [b"global", house.key().as_ref()], space = Global::LEN, bump)]
+    #[account(init, payer = thread, seeds = [b"global", house.key().as_ref()], space = Global::LEN, bump)]
     pub global: Account<'info, Global>,
 
     // system program
@@ -19,7 +22,7 @@ pub struct GlobalC<'info> {
 impl<'info> GlobalC<'info> {
     pub fn init(&mut self, bumps: &BTreeMap<String, u8>,) -> Result<()> {
         self.global.set_inner( Global {
-            auth: self.house.key(),
+            auth: self.thread.key(),
             round: 1,
             number: 50,
             bump: *bumps.get("global").unwrap(),

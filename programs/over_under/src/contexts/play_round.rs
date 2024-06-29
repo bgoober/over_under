@@ -74,10 +74,10 @@ impl<'info> PlayRoundC<'info> {
             Error::Ed25519Signature
         );
 
-        msg!("signature.message: {:#?}", signature.message.as_ref().unwrap());
+        //msg!("signature.message: {:#?}", signature.message.as_ref().unwrap());
 
         // print self.round.to_slice()
-        msg!("self.round.to_slice(): {:#?}", self.round.to_slice());
+        //msg!("self.round.to_slice(): {:#?}", self.round.to_slice());
 
         // Ensure messages match
         require!(

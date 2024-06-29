@@ -12,20 +12,20 @@ pub struct PayC<'info> {
     #[account(mut, constraint = player.key() == bet.player.key())]
     pub player: Signer<'info>,
 
-    #[account(mut)]
+    #[account()]
     pub house: SystemAccount<'info>,
 
     #[account(
         seeds = [b"global", house.key().as_ref()],
         bump
     )]
-    pub global: Box<Account<'info, Global>>,
+    pub global: Account<'info, Global>,
 
     #[account(
         seeds = [b"round", global.key().as_ref(), global.round.to_le_bytes().as_ref()],
         bump
     )]
-    pub round: Box<Account<'info, Round>>,
+    pub round: Account<'info, Round>,
 
     #[account(mut,
         seeds = [b"vault", round.key().as_ref()],
@@ -44,24 +44,7 @@ pub struct PayC<'info> {
 
 impl<'info> PayC<'info> {
     pub fn payout(&mut self) -> Result<()> {
-        // if the round.outcome = 2, then send all lamports in the vault to the house
-        // else if the signer is equal to the bet.player key, then transfer the bet.payout to the player
-        if self.round.outcome == 2 {
-            let amount = self.vault.lamports();
-            let cpi_program = self.system_program.to_account_info();
-            let cpi_accounts = Transfer {
-                from: self.vault.to_account_info(),
-                to: self.house.to_account_info(),
-            };
-
-            let seeds = &[b"vault", self.round.to_account_info().key.as_ref()];
-
-            let signer = &[&seeds[..]];
-
-            let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
-
-            transfer(cpi_ctx, amount)?;
-        } else if self.bet.payout > 0 && self.player.key() == self.bet.player.key() {
+        if self.bet.payout > 0 && self.player.key() == self.bet.player.key() {
             let amount = self.bet.payout;
             let cpi_program = self.system_program.to_account_info();
 
@@ -79,7 +62,7 @@ impl<'info> PayC<'info> {
             transfer(cpi_ctx, amount)?;
         }
 
-        self.bet.close(self.player.to_account_info())?;
+        //self.bet.close(self.player.to_account_info())?;
         Ok(())
     }
 }

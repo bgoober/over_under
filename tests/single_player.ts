@@ -55,7 +55,7 @@ describe("over_under", () => {
     const globalAccount = await program.account.global.fetch(global);
 
     console.log(
-      `global round: ${globalAccount}`,
+      `global round: `,
       globalAccount.round.toString()
     );
 
@@ -84,7 +84,7 @@ describe("over_under", () => {
 
     // Fetch the round account
     const roundAccount = await program.account.round.fetch(round);
-    console.log(`round: ${roundAccount}`, roundAccount.round.toString());
+    console.log(`current round: `, roundAccount.round.toString());
 
     // Fetch the vault account
     // const vaultAccount = await program.account.vault.fetch(vault);
@@ -108,11 +108,12 @@ describe("over_under", () => {
       [Buffer.from("vault"), round.toBuffer()],
       program.programId
     );
+    // Fetch the round account
     const roundAccount = await program.account.round.fetch(round);
-    console.log(`round: ${roundAccount}`, roundAccount.round.toString());
+    console.log(`current round: `, roundAccount.round.toString());
 
     console.log(
-      `global round: ${globalAccount}`,
+      `global round: `,
       globalAccount.round.toString()
     );
 
@@ -146,11 +147,11 @@ describe("over_under", () => {
     // fetch the bet
     const betAccount = await program.account.bet.fetch(bet);
     const roundAccount2 = await program.account.round.fetch(round);
-    console.log(`bet amount: ${betAccount}`, betAccount.amount.toString());
+    console.log(`bet amount: `, betAccount.amount.toString());
     console.log("bet: ${betAccount}", betAccount.bet.toString());
     // log the round.bets length
     console.log(
-      `round2 bets length: ${roundAccount2}`,
+      `round2 bets length: `,
       roundAccount2.bets.length
     );
     console.log("round2 bets: ", roundAccount2.bets);
@@ -170,19 +171,17 @@ describe("over_under", () => {
       program.programId
     );
 
+    // fetch the round and print its round.number
+    const roundAccount = await program.account.round.fetch(round);
+    console.log(`round random number: `, roundAccount.number.toString());
+    console.log(`current round: `, roundAccount.round.toString());
+
     const [vault] = web3.PublicKey.findProgramAddressSync(
       [Buffer.from("vault"), round.toBuffer()],
       program.programId
     );
-    const roundAccount = await program.account.round.fetch(round);
-    console.log(`round: ${roundAccount}`, roundAccount.round.toString());
 
-    console.log(
-      `global round: ${globalAccount}`,
-      globalAccount.round.toString()
-    );
-
-    console.log("test1");
+    // console.log("test1");
 
     let account = await anchor
       .getProvider()
@@ -192,7 +191,7 @@ describe("over_under", () => {
       message: account.data.subarray(8),
     });
 
-    console.log("test2");
+    // console.log("test2");
 
     const resolve_ix = await program.methods
       .playRound(Buffer.from(sig_ix.data.buffer.slice(16 + 32, 16 + 32 + 64)))
@@ -207,61 +206,73 @@ describe("over_under", () => {
       })
       .instruction();
 
-    console.log("test3");
+    // console.log("test3");
     const tx = new Transaction().add(sig_ix).add(resolve_ix);
 
-    console.log("test4");
+    // console.log("test4");
 
     await sendAndConfirmTransaction(program.provider.connection, tx, [keypair])
       .then(log)
       .catch((error) => console.error("Transaction # Error:", error));
 
-    console.log("test5");
+    // console.log("test5");
 
-    // fetch global
-    const globalAccount2 = await program.account.global.fetch(global);
-    console.log("global number: ", globalAccount2.number.toString());
-    console.log("global round: ", globalAccount2.round.toString());
-    console.log("round bets: ", roundAccount.bets);
+    // fetch the new round
+    const roundAccount2 = await program.account.round.fetch(round);
+    console.log(`current round: `, roundAccount2.round.toString());
+    console.log("round random number: ", roundAccount2.number.toString());
+
+    
   });
 
   it("Winners Assessed!", async () => {
-    // fetch global
+    // Fetch the global account
     const globalAccount = await program.account.global.fetch(global);
+    console.log("global number: ", globalAccount.number.toString());
+    console.log("global round: ", globalAccount.round.toString());
 
-    // fetch round
     const _roundBN = new BN(globalAccount.round.toString());
+
+    // Convert to 8-byte Buffer in little-endian for other operations
     const _roundBuffer = _roundBN.toArrayLike(Buffer, "le", 8);
     const [round] = web3.PublicKey.findProgramAddressSync(
       [Buffer.from("round"), global.toBuffer(), _roundBuffer],
       program.programId
     );
-
-    const roundAccount = await program.account.round.fetch(round);
+    console.log("round: ", round.toString());
 
     const [vault] = web3.PublicKey.findProgramAddressSync(
       [Buffer.from("vault"), round.toBuffer()],
       program.programId
     );
+    console.log("vault: ", vault.toString());
 
-    for (let betAccount of roundAccount.bets) {
-    await program.account.bet.fetchMultiple(roundAccount.bets); 
+    // Fetch the round account
+    const roundAccount = await program.account.round.fetch(round);
+    console.log(`current round: ${roundAccount}`, roundAccount.round.toString());
 
-      const tx = await program.methods
-        .assessWinners()
-        .accounts({
-          house: keypair.publicKey,
-          global,
-          round,
-          vault,
-          systemProgram: SystemProgram.programId,
-        })
-        .remainingAccounts([{pubkey: betAccount, isSigner: false, isWritable: true}])
-        .signers([keypair])
-        .rpc()
-        .then(confirm)
-        .then(log);
-    }
+    const remainingAccounts = roundAccount.bets.map((betAccount) => ({
+      pubkey: betAccount,
+      isSigner: false,
+      isWritable: true,
+    }));
+
+    console.log("remaining accounts: ", remainingAccounts);
+
+    const tx = await program.methods
+      .assessWinners()
+      .accounts({
+        house: keypair.publicKey,
+        global,
+        round,
+        vault,
+        systemProgram: SystemProgram.programId,
+      })
+      .remainingAccounts([...remainingAccounts])
+      .signers([keypair])
+      .rpc()
+      .then(confirm)
+      .then(log);
   });
 
   it("Payed Out!", async () => {
@@ -269,6 +280,7 @@ describe("over_under", () => {
     const globalAccount = await program.account.global.fetch(global);
 
     console.log("global number: ", globalAccount.number.toString());
+    console.log("global round: ", globalAccount.round.toString());
 
     const _roundBN = new BN(globalAccount.round.toString());
 
@@ -284,18 +296,10 @@ describe("over_under", () => {
       [Buffer.from("vault"), round.toBuffer()],
       program.programId
     );
+    // Fetch the round account
     const roundAccount = await program.account.round.fetch(round);
-    console.log(`round: ${roundAccount}`, roundAccount.round.toString());
-
-    console.log(
-      `global round: ${globalAccount}`,
-      globalAccount.round.toString()
-    );
-    // log the global.number
-    console.log(
-      `global number: ${globalAccount}`,
-      globalAccount.number.toString()
-    );
+    console.log(`current round: `, roundAccount.round.toString());
+    console.log("round random number: ", roundAccount.number.toString());
 
     const [bet] = web3.PublicKey.findProgramAddressSync(
       [Buffer.from("bet"), round.toBuffer(), keypair.publicKey.toBuffer()],
@@ -348,5 +352,10 @@ describe("over_under", () => {
       .rpc()
       .then(confirm)
       .then(log);
+
+    // fetch new global
+    const globalAccount2 = await program.account.global.fetch(global);
+    console.log("global number: ", globalAccount2.number.toString());
+    console.log("global round: ", globalAccount2.round.toString());
   });
 });

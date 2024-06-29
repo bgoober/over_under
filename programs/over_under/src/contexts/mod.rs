@@ -10,8 +10,8 @@ pub use place_bet::*;
 pub mod play_round;
 pub use play_round::*;
 
-pub mod payout;
-pub use payout::*;
+pub mod single_payout;
+pub use single_payout::*;
 
 pub mod close_round;
 pub use close_round::*;

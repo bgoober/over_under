@@ -52,24 +52,21 @@ pub mod over_under {
     }
 
     pub fn assess_winners(ctx: Context<AssessWinnersC>) -> Result<()> {
-            if ctx.accounts.round.outcome == 2 {
-                 // make a cpi transfer from the vault to the House account for the entire vault lamports
-                let cpi_program = ctx.accounts.system_program.to_account_info();
-                let cpi_accounts = Transfer {
-                    from: ctx.accounts.vault.to_account_info(),
-                    to: ctx.accounts.house.to_account_info(),
-                };
+        if ctx.accounts.round.outcome == 2 {
+            // make a cpi transfer from the vault to the House account for the entire vault lamports
+            let cpi_program = ctx.accounts.system_program.to_account_info();
+            let cpi_accounts = Transfer {
+                from: ctx.accounts.vault.to_account_info(),
+                to: ctx.accounts.house.to_account_info(),
+            };
 
-                let seeds = &[b"vault", ctx.accounts.round.to_account_info().key.as_ref()];
-                let signer = &[&seeds[..]];
+            let seeds = &[b"vault", ctx.accounts.round.to_account_info().key.as_ref()];
+            let signer = &[&seeds[..]];
 
-                let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts)
-                    .with_signer(signer);
+            let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts).with_signer(signer);
 
-                transfer(cpi_ctx, ctx.accounts.vault.lamports())?;
-    
-            }
-            
+            transfer(cpi_ctx, ctx.accounts.vault.lamports())?;
+        } else {
             let mut total_winners_pot = 0;
             let mut winner_accounts = Vec::new();
 
@@ -95,14 +92,18 @@ pub mod over_under {
                 account_to_write.payout = payout;
 
                 // Find the account by account_key to serialize data back
-                if let Some(account) = ctx.remaining_accounts.iter().find(|a| a.key() == account.key()) {
+                if let Some(account) = ctx
+                    .remaining_accounts
+                    .iter()
+                    .find(|a| a.key() == account.key())
+                {
                     let mut data = account.try_borrow_mut_data()?;
                     let _ = account_to_write.try_serialize(&mut data.as_mut());
                 }
             }
+        }
 
-            Ok(())
-
+        Ok(())
     }
 
     pub fn payout(ctx: Context<PayC>) -> Result<()> {
@@ -115,5 +116,3 @@ pub mod over_under {
         Ok(())
     }
 }
-
-

@@ -36,4 +36,6 @@ pub enum Error {
     RoundStillOngoing,
     #[msg("No Bets In Round")]
     NoBetsInRound,
+    #[msg("Round Mismatch")]
+    RoundMismatch
 }

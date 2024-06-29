@@ -14,7 +14,7 @@ pub struct CloseRoundC<'info> {
     pub house: SystemAccount<'info>,
 
     // global as ref
-    #[account(
+    #[account(mut,
         seeds = [b"global", house.key().as_ref()],
         bump
     )]
@@ -36,8 +36,13 @@ impl<'info> CloseRoundC<'info> {
         // check if the self.round.outcome is 3, or if the self.round.bets.len() is 0, or the self.round.number is 101, and if any of these are true, return an error that the round is still ongoing and can't be closed, else close the round
         if self.round.outcome == 3 || self.round.number == 101 {
             return Err(Error::RoundStillOngoing.into());
-        } else {
+        } else if self.round.round == self.global.round {
+            self.global.round += 1;
+            self.global.number = self.round.number;
+
             self.round.close(self.house.to_account_info())?;
+        } else {
+            return Err(Error::RoundMismatch.into());
         }
 
         Ok(())

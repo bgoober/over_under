@@ -21,7 +21,7 @@ pub struct PlayRoundC<'info> {
     pub house: SystemAccount<'info>,
 
     // global account which is a pda of the program ID and the house pubkey
-    #[account(mut,
+    #[account(
         seeds = [b"global", house.key().as_ref()],
         bump
     )]
@@ -118,8 +118,6 @@ impl<'info> PlayRoundC<'info> {
                     self.global.number = roll;
                 }
             }
-
-            self.global.round += 1;
 
             msg!("Round Outcome: {:?}", self.round.outcome);
             msg!("Round Number: {:?}", self.round.number);

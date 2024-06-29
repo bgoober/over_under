@@ -12,7 +12,7 @@ pub struct PayC<'info> {
     #[account(mut, constraint = player.key() == bet.player.key())]
     pub player: Signer<'info>,
 
-    #[account()]
+    #[account(constraint = house.key() == global.auth.key())]
     pub house: SystemAccount<'info>,
 
     #[account(
@@ -53,16 +53,20 @@ impl<'info> PayC<'info> {
                 to: self.player.to_account_info(),
             };
 
-            let seeds = &[b"vault", self.round.to_account_info().key.as_ref()];
+            let seeds = &[
+                b"vault",
+                self.round.to_account_info().key.as_ref(),
+                &[self.round.vault_bump],
+            ];
+    
+            let signer_seeds = &[&seeds[..]];
 
-            let signer = &[&seeds[..]];
-
-            let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
+            let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
 
             transfer(cpi_ctx, amount)?;
         }
 
-        //self.bet.close(self.player.to_account_info())?;
+        self.bet.close(self.player.to_account_info())?;
         Ok(())
     }
 }

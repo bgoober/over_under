@@ -20,11 +20,11 @@ pub struct AssessWinnersC<'info> {
     pub global: Account<'info, Global>,
 
     // round account
-    #[account(seeds = [b"round", global.key().as_ref(), global.round.to_le_bytes().as_ref()], bump)]
+    #[account(seeds = [b"round", global.key().as_ref(), global.round.to_le_bytes().as_ref()], bump = round.bump)]
     pub round: Account<'info, Round>,
 
     // vault account
-    #[account(seeds = [b"vault", round.key().as_ref()], bump)]
+    #[account(seeds = [b"vault", round.key().as_ref()], bump = round.vault_bump)]
     pub vault: SystemAccount<'info>,
 
     // system program

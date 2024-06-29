@@ -27,16 +27,17 @@ pub struct Round {
     pub round: u64, // the round number 
     pub number: u8, // the random number of the round
     pub bump: u8, // the bump used to generate the round PDA
+    pub vault_bump: u8, // the bump used to generate the vault PDA
     pub outcome: u8, // the outcome of the user's bet vs the number drawn. evaluated and updated in resolve round
     pub bets: Vec<Pubkey>, // the players that placed a bet in the round
 }
 
 impl Round { 
-    pub const LEN: usize = 8+8+1+(4+(32*10))+1+1;
+    pub const LEN: usize = 8+8+1+(4+(32*10))+1+1+1;
 
     pub fn to_slice(&self) -> Vec<u8> {
         let mut s = self.round.to_le_bytes().to_vec();
-        s.extend_from_slice(&[self.number, self.bump, self.outcome]);
+        s.extend_from_slice(&[self.number, self.bump, self.outcome, self.vault_bump]);
         
         // Serialize the length of the bets vector as a 32-bit unsigned integer (u32)
         let bets_length = self.bets.len() as u32;

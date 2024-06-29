@@ -299,7 +299,7 @@ describe("over_under", () => {
       `global number: `,
       globalAccount.number.toString()
     );
-
+    
     const [bet] = web3.PublicKey.findProgramAddressSync(
       [Buffer.from("bet"), round.toBuffer(), keypair.publicKey.toBuffer()],
       program.programId
@@ -316,7 +316,7 @@ describe("over_under", () => {
       .payout() // Use BN objects for the first and third arguments
       .accounts({
         house: keypair.publicKey,
-        global,
+        global: global,
         round,
         vault,
         bet,

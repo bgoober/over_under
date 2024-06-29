@@ -23,7 +23,7 @@ pub struct CloseRoundC<'info> {
     // round to close
     #[account(mut, close = house,
         seeds = [b"round", global.key().as_ref(), global.round.to_le_bytes().as_ref()],
-        bump
+        bump = round.bump
     )]
     pub round: Account<'info, Round>,
 

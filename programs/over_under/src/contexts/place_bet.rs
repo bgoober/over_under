@@ -31,11 +31,11 @@ pub struct BetC<'info> {
     pub global: Account<'info, Global>,
 
     // round the player is placing a bet in,
-    #[account(mut, seeds = [b"round", global.key().as_ref(), global.round.to_le_bytes().as_ref()], bump)]
+    #[account(mut, seeds = [b"round", global.key().as_ref(), global.round.to_le_bytes().as_ref()], bump = round.bump)]
     pub round: Account<'info, Round>,
 
     // vault pda of the round account
-    #[account(mut, seeds = [b"vault", round.key().as_ref()], bump)]
+    #[account(mut, seeds = [b"vault", round.key().as_ref()], bump = round.vault_bump)]
     pub vault: SystemAccount<'info>,
 
     // bet account to store the bet which is a pda of the round account

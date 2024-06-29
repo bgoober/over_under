@@ -45,6 +45,7 @@ impl <'info> RoundC<'info> {
             outcome: 3,
             bets: Vec::with_capacity(10),
             bump: *bumps.get("round").unwrap(),
+            vault_bump: *bumps.get("vault").unwrap(),
         });
 
         msg!("round.round: {}", self.round.round);

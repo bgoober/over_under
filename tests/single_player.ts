@@ -15,6 +15,7 @@ import BN from "bn.js";
 
 // use my local keypair for signing
 import wallet from "/home/agent/.config/solana/id.json";
+import { publicKey } from "@coral-xyz/anchor/dist/cjs/utils";
 
 // Get the keypair from the wallet
 const keypair = Keypair.fromSecretKey(new Uint8Array(wallet));
@@ -148,9 +149,11 @@ describe("over_under", () => {
     console.log(`bet amount: ${betAccount}`, betAccount.amount.toString());
     console.log("bet: ${betAccount}", betAccount.bet.toString());
     // log the round.bets length
-    console.log(`round2 bets length: ${roundAccount2}`, roundAccount2.bets.length);
+    console.log(
+      `round2 bets length: ${roundAccount2}`,
+      roundAccount2.bets.length
+    );
     console.log("round2 bets: ", roundAccount2.bets);
-
   });
 
   // play_round
@@ -179,11 +182,6 @@ describe("over_under", () => {
       globalAccount.round.toString()
     );
 
-    const [bet] = web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("bet"), round.toBuffer(), keypair.publicKey.toBuffer()],
-      program.programId
-    );
-
     console.log("test1");
 
     let account = await anchor
@@ -202,7 +200,6 @@ describe("over_under", () => {
         thread: keypair.publicKey,
         house: keypair.publicKey,
         global,
-        bet,
         round,
         vault,
         instructionSysvar: SYSVAR_INSTRUCTIONS_PUBKEY,
@@ -219,11 +216,6 @@ describe("over_under", () => {
       .then(log)
       .catch((error) => console.error("Transaction # Error:", error));
 
-    // await sendAndConfirmTransaction(program.provider.connection, tx, [
-    //   keypair,
-    // ]).then(log);
-    // console.log("ROUND PLAYED TX SUCCESSFUL");
-
     console.log("test5");
 
     // fetch global
@@ -231,6 +223,45 @@ describe("over_under", () => {
     console.log("global number: ", globalAccount2.number.toString());
     console.log("global round: ", globalAccount2.round.toString());
     console.log("round bets: ", roundAccount.bets);
+  });
+
+  it("Winners Assessed!", async () => {
+    // fetch global
+    const globalAccount = await program.account.global.fetch(global);
+
+    // fetch round
+    const _roundBN = new BN(globalAccount.round.toString());
+    const _roundBuffer = _roundBN.toArrayLike(Buffer, "le", 8);
+    const [round] = web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("round"), global.toBuffer(), _roundBuffer],
+      program.programId
+    );
+
+    const roundAccount = await program.account.round.fetch(round);
+
+    const [vault] = web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("vault"), round.toBuffer()],
+      program.programId
+    );
+
+    for (let betAccount of roundAccount.bets) {
+    await program.account.bet.fetchMultiple(roundAccount.bets); 
+
+      const tx = await program.methods
+        .assessWinners()
+        .accounts({
+          house: keypair.publicKey,
+          global,
+          round,
+          vault,
+          systemProgram: SystemProgram.programId,
+        })
+        .remainingAccounts([{pubkey: betAccount, isSigner: false, isWritable: true}])
+        .signers([keypair])
+        .rpc()
+        .then(confirm)
+        .then(log);
+    }
   });
 
   it("Payed Out!", async () => {

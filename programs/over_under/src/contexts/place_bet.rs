@@ -24,14 +24,14 @@ pub struct BetC<'info> {
     pub house: SystemAccount<'info>,
 
     // global account which is a pda of the program ID and the house pubkey
-    #[account(
+    #[account(mut,
         seeds = [b"global", house.key().as_ref()],
         bump
     )]
     pub global: Account<'info, Global>,
-    
+
     // round the player is placing a bet in,
-    #[account(seeds = [b"round", global.key().as_ref(), global.round.to_le_bytes().as_ref()], bump)]
+    #[account(mut, seeds = [b"round", global.key().as_ref(), global.round.to_le_bytes().as_ref()], bump)]
     pub round: Account<'info, Round>,
 
     // vault pda of the round account
@@ -48,53 +48,49 @@ pub struct BetC<'info> {
 
 impl<'info> BetC<'info> {
     // create bet function to create a bet
-    pub fn init(&mut self, amount: u64, bet: u8, round: u64, bumps: &BTreeMap<String, u8>) -> Result<()> {
-        
+    pub fn init(
+        &mut self,
+        amount: u64,
+        bet: u8,
+        round: u64,
+        bumps: &BTreeMap<String, u8>,
+    ) -> Result<()> {
         if self.round.outcome != 3 || self.round.number != 101 {
             return Err(Error::RoundAlreadyPlayed.into());
         } else {
-        self.bet.set_inner(Bet {
-            player: self.player.key(),
-            amount,
-            bet,
-            round,
-            payout: 0,
-            bump: *bumps.get("bet").unwrap(),
-        });
+            self.bet.set_inner(Bet {
+                player: self.player.key(),
+                amount,
+                bet,
+                round,
+                payout: 0,
+                bump: *bumps.get("bet").unwrap(),
+            });
 
-        // print the round.bets vector
-        msg!(&format!("66 - round.bets.len(): {:#?}", self.round.bets));
+            // print the round.bets vector
+            msg!(&format!(
+                "before push - round.bets.len(): {:#?}",
+                self.round.bets
+            ));
 
-        let betkey = self.bet.key();
+            let betkey = self.bet.key();
+            self.round.bets.push(betkey);
 
-        let mut round_bets = self.round.bets.to_vec();
+            msg!(&format!(
+                "after push - round.bets.len(): {:#?}",
+                self.round.bets
+            ));
 
-        round_bets.push(betkey);
+            msg!("bet.player {}", self.bet.player);
+            msg!("bet.amount {}", self.bet.amount);
+            msg!("bet.bet {}", self.bet.bet);
+            msg!("bet.round {}", self.bet.round);
+            msg!("bet.payout {}", self.bet.payout);
+            msg!("round.bets.len(): {}", self.round.bets.len());
 
-        self.round.bets = round_bets;
-        msg!(&format!("75 - round.bets.len(): {:#?}", self.round.bets));
-
-
-        msg!("bet.player {}", self.bet.player);
-        msg!("bet.amount {}", self.bet.amount);
-        msg!("bet.bet {}", self.bet.bet);
-        msg!("bet.round {}", self.bet.round);
-        msg!("bet.payout {}", self.bet.payout);
-        msg!("round.bets.len(): {}", self.round.bets.len());
-    
-
-        Ok(())
+            Ok(())
+        }
     }
-}
-
-    // upate the round.players with the player's pubkey
-    // pub fn update_round_players(&mut self) -> Result<()> {
-    //     if !self.round.players.contains(&self.player.key) {
-    //         self.round.players.push(*self.player.key);
-    //     }
-    //     Ok(())
-    // }
-
     // deposit to vault function
     pub fn deposit(&mut self, amount: u64) -> Result<()> {
         let accounts = Transfer {

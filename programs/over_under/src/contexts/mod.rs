@@ -15,3 +15,6 @@ pub use payout::*;
 
 pub mod close_round;
 pub use close_round::*;
+
+pub mod assess_winners;
+pub use assess_winners::*;

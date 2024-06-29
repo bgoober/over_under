@@ -13,7 +13,7 @@ pub struct PayC<'info> {
     pub player: Signer<'info>,
 
     #[account(mut)]
-    pub house: Signer<'info>,
+    pub house: SystemAccount<'info>,
 
     #[account(
         seeds = [b"global", house.key().as_ref()],
@@ -21,7 +21,7 @@ pub struct PayC<'info> {
     )]
     pub global: Box<Account<'info, Global>>,
 
-    #[account(mut,
+    #[account(
         seeds = [b"round", global.key().as_ref(), global.round.to_le_bytes().as_ref()],
         bump
     )]

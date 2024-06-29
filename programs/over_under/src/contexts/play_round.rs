@@ -8,7 +8,7 @@ use solana_program::{
 
 use crate::{
     errors::Error,
-    state::{Bet, Global, Round},
+    state::{Global, Round},
 };
 
 #[derive(Accounts)]
@@ -17,21 +17,18 @@ pub struct PlayRoundC<'info> {
     thread: Signer<'info>,
 
     // the pubkey of the signer of init global
-    #[account(mut)]
+    #[account()]
     pub house: SystemAccount<'info>,
 
     // global account which is a pda of the program ID and the house pubkey
-    #[account(
+    #[account(mut,
         seeds = [b"global", house.key().as_ref()],
         bump
     )]
     pub global: Account<'info, Global>,
 
-    #[account(mut)]
-    pub bet: Account<'info, Bet>,
-
     // round the player is placing a bet in,
-    #[account(seeds = [b"round", global.key().as_ref(), global.round.to_le_bytes().as_ref()], bump)]
+    #[account(mut, seeds = [b"round", global.key().as_ref(), global.round.to_le_bytes().as_ref()], bump)]
     pub round: Account<'info, Round>,
 
     // vault pda of the round account
@@ -116,7 +113,7 @@ impl<'info> PlayRoundC<'info> {
                 } else if self.round.number < self.global.number {
                     self.round.outcome = 0; // number was lower
                     self.global.number = roll;
-                } else if self.round.number == self.global.number{
+                } else if self.round.number == self.global.number {
                     self.round.outcome = 2; // number was the same
                     self.global.number = roll;
                 }
@@ -124,30 +121,6 @@ impl<'info> PlayRoundC<'info> {
 
             self.global.round += 1;
 
-            {
-                // Step 1: Collect necessary changes without mutating `self.round`
-                let mut total_winners_pot = 0;
-                let mut winner_accounts = Vec::new();
-
-                let vault = self.vault.lamports();
-
-                for betkey in &self.round.bets {
-                    let account_to_write = Bet::try_deserialize(&mut betkey.as_ref())
-                        .expect("Error Deserializing Data");
-                    if account_to_write.bet == self.round.outcome {
-                        total_winners_pot += account_to_write.amount;
-                        winner_accounts.push((betkey.clone(), account_to_write));
-                        // Collect winners to update later
-                    }
-                }
-
-                // Step 2: Apply collected changes
-                for (mut betkey, mut account_to_write) in winner_accounts {
-                    let payout = (account_to_write.amount / total_winners_pot) * vault;
-                    account_to_write.payout = payout;
-                    let _ = account_to_write.try_serialize(&mut betkey.as_mut());
-                }
-            }
             msg!("Round Outcome: {:?}", self.round.outcome);
             msg!("Round Number: {:?}", self.round.number);
             msg!("Global Number: {:?}", self.global.number);

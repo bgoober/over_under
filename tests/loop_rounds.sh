@@ -1,7 +1,7 @@
 #!/bin/bash
 
-for ((i=0; i<6; i++))
+for ((i=0; i<20; i++))
 do
     anchor run test
-    sleep 10
+    sleep 5
 done

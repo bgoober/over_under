@@ -47,7 +47,16 @@ describe("over_under", () => {
 
   it("Global initialized!", async () => {
     // Add your test here.
-    const tx = await program.methods.initGlobal().accounts({ global }).rpc().then(confirm).then(log);
+    try {
+      const tx = await program.methods.initGlobal().accounts({ global }).rpc().then(confirm).then(log);
+    } catch (error) {
+      if (error.message.includes("already in use")) {
+        // Accept the error and continue
+        console.log("Global account already initialized.");
+      } else {
+        throw error;
+      }
+    }
 
   });
 
@@ -332,8 +341,8 @@ describe("over_under", () => {
     // fetch global
     const globalAccount = await program.account.global.fetch(global);
 
-    console.log("global number: ", globalAccount.number.toString());
-    console.log("global round: ", globalAccount.round.toString());
+    console.log("old global number: ", globalAccount.number.toString());
+    console.log("old global round: ", globalAccount.round.toString());
 
     const _roundBN = new BN(globalAccount.round.toString());
 
@@ -360,7 +369,7 @@ describe("over_under", () => {
 
     // fetch global
     const globalAccount2 = await program.account.global.fetch(global);
-    console.log("global number: ", globalAccount2.number.toString());
-    console.log("global round: ", globalAccount2.round.toString());
+    console.log("new global number: ", globalAccount2.number.toString());
+    console.log("new global round: ", globalAccount2.round.toString());
   });
 });

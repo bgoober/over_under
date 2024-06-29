@@ -9,7 +9,7 @@ pub struct GlobalC<'info> {
     pub house: Signer<'info>,
 
     // global
-    #[account(init_if_needed, payer = house, seeds = [b"global", house.key().as_ref()], space = Global::LEN, bump)]
+    #[account(init, payer = house, seeds = [b"global", house.key().as_ref()], space = Global::LEN, bump)]
     pub global: Account<'info, Global>,
 
     // system program

@@ -91,14 +91,6 @@ describe("over_under", () => {
       .rpc()
       .then(confirm)
       .then(log);
-
-    // Fetch the round account
-    const roundAccount = await program.account.round.fetch(round);
-    console.log(`round: ${roundAccount}`, roundAccount.round.toString());
-
-    // Fetch the vault account
-    // const vaultAccount = await program.account.vault.fetch(vault);
-    // console.log(`vault: ${vaultAccount}`, vaultAccount.round.toString());
   });
 
   // placeBet
@@ -160,7 +152,7 @@ describe("over_under", () => {
     console.log("bet: ", betAccount.bet.toString());
     // log the round.bets length
     console.log(
-      `round2 bets length: ${roundAccount2}`,
+      `round2 bets length: `,
       roundAccount2.bets.length
     );
     console.log("round2 bets: ", roundAccount2.bets);
@@ -192,8 +184,6 @@ describe("over_under", () => {
       globalAccount.round.toString()
     );
 
-    // console.log("test1");
-
     let account = await anchor
       .getProvider()
       .connection.getAccountInfo(round, "confirmed");
@@ -201,8 +191,6 @@ describe("over_under", () => {
       privateKey: keypair.secretKey,
       message: account.data.subarray(8),
     });
-
-    // console.log("test2");
 
     const resolve_ix = await program.methods
       .playRound(Buffer.from(sig_ix.data.buffer.slice(16 + 32, 16 + 32 + 64)))
@@ -217,22 +205,12 @@ describe("over_under", () => {
       })
       .instruction();
 
-    // console.log("test3");
     const tx = new Transaction().add(sig_ix).add(resolve_ix);
-
-    // console.log("test4");
 
     await sendAndConfirmTransaction(program.provider.connection, tx, [keypair])
       .then(log)
       .catch((error) => console.error("Transaction # Error:", error));
 
-    // console.log("test5");
-
-    // fetch global
-    const globalAccount2 = await program.account.global.fetch(global);
-    console.log("global number: ", globalAccount2.number.toString());
-    console.log("global round: ", globalAccount2.round.toString());
-    console.log("round bets: ", roundAccount.bets);
   });
 
   it("Winners Assessed!", async () => {
@@ -298,16 +276,6 @@ describe("over_under", () => {
     );
     const roundAccount = await program.account.round.fetch(round);
     console.log(`round: `, roundAccount.round.toString());
-
-    console.log(
-      `global round: `,
-      globalAccount.round.toString()
-    );
-    // log the global.number
-    console.log(
-      `global number: `,
-      globalAccount.number.toString()
-    );
     
     const [bet] = web3.PublicKey.findProgramAddressSync(
       [Buffer.from("bet"), round.toBuffer(), keypair.publicKey.toBuffer()],
@@ -315,10 +283,10 @@ describe("over_under", () => {
     );
     // fetch the bet
     const betAccount = await program.account.bet.fetch(bet);
-    console.log(`bet amount: `, betAccount.amount.toString());
-    console.log("bet bet: ", betAccount.bet.toString());
     console.log("bet player: ", betAccount.player.toString());
-    console.log("bet round: ", betAccount.round.toString());
+    console.log("bet bet: ", betAccount.bet.toString());
+    console.log(`bet amount: `, betAccount.amount.toString());
+    console.log("bet made in round: ", betAccount.round.toString());
     console.log("bet payout: ", betAccount.payout.toString());
 
     const tx = await program.methods
@@ -341,8 +309,9 @@ describe("over_under", () => {
     // fetch global
     const globalAccount = await program.account.global.fetch(global);
 
-    console.log("old global number: ", globalAccount.number.toString());
     console.log("old global round: ", globalAccount.round.toString());
+    console.log("old global number: ", globalAccount.number.toString());
+
 
     const _roundBN = new BN(globalAccount.round.toString());
 
@@ -369,7 +338,7 @@ describe("over_under", () => {
 
     // fetch global
     const globalAccount2 = await program.account.global.fetch(global);
-    console.log("new global number: ", globalAccount2.number.toString());
     console.log("new global round: ", globalAccount2.round.toString());
+    console.log("new global number: ", globalAccount2.number.toString());
   });
 });

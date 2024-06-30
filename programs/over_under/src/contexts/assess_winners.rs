@@ -21,7 +21,7 @@ pub struct AssessWinnersC<'info> {
 
     // round account
     #[account(seeds = [b"round", global.key().as_ref(), global.round.to_le_bytes().as_ref()], bump = round.bump)]
-    pub round: Account<'info, Round>,
+    pub round: Box<Account<'info, Round>>,
 
     // vault account
     #[account(seeds = [b"vault", round.key().as_ref()], bump = round.vault_bump)]

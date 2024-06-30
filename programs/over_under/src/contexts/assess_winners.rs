@@ -9,7 +9,7 @@ pub struct AssessWinnersC<'info> {
     pub thread: Signer<'info>,
 
     // house
-    #[account(mut, constraint = house.key() == global.auth.key())]
+    #[account(mut)]
     pub house: SystemAccount<'info>,
 
     // global account

@@ -118,7 +118,7 @@ describe("over_under", () => {
 
     let round_number = roundAccount.round.toNumber();
     console.log(`round number: `, round_number);
- 
+
     // This should be the player's public key or similar identifier
     const [bet] = web3.PublicKey.findProgramAddressSync(
       [Buffer.from("bet"), round.toBuffer(), keypair.publicKey.toBuffer()],
@@ -156,7 +156,6 @@ describe("over_under", () => {
     console.log(`round2 bets length: `, roundAccount2.bets.length);
     console.log("round2 players: ", roundAccount2.players);
     console.log("round2 bets: ", roundAccount2.bets);
-
   });
 
   // play_round
@@ -311,16 +310,15 @@ describe("over_under", () => {
         ACCOUNTS[`bet${i + 1}`] = null;
       }
     }
-    console.log("ACCOUNTS: ", ACCOUNTS);
-    console.log("ACCOUNTS length: ", Object.keys(ACCOUNTS).length);
-    console.log("ACCOUNTS keys: ", Object.keys(ACCOUNTS));
-    console.log("ACCOUNTS values: ", Object.values(ACCOUNTS));
-    console.log("ACCOUNTS entries: ", Object.entries(ACCOUNTS));
-    console.log("ACCOUNTS player1: ", ACCOUNTS[0]);
-    console.log("ACCOUNTS bet1: ", ACCOUNTS[0]);
-    console.log("ACCOUNTS player2: ", ACCOUNTS[1]);
-    console.log("ACCOUNTS bet2: ", ACCOUNTS[1]);
-
+    // console.log("ACCOUNTS: ", ACCOUNTS);
+    // console.log("ACCOUNTS length: ", Object.keys(ACCOUNTS).length);
+    // console.log("ACCOUNTS keys: ", Object.keys(ACCOUNTS));
+    // console.log("ACCOUNTS values: ", Object.values(ACCOUNTS));
+    // console.log("ACCOUNTS entries: ", Object.entries(ACCOUNTS));
+    // console.log("ACCOUNTS player1: ", ACCOUNTS[0]);
+    // console.log("ACCOUNTS bet1: ", ACCOUNTS[0]);
+    // console.log("ACCOUNTS player2: ", ACCOUNTS[1]);
+    // console.log("ACCOUNTS bet2: ", ACCOUNTS[1]);
 
     // Construct the instruction with the populated ACCOUNTS object
     const tx = await program.methods
@@ -329,7 +327,7 @@ describe("over_under", () => {
       .rpc()
       .then(confirm)
       .then(log);
-      });
+  });
 
   it("Round is Closed!", async () => {
     // fetch global
@@ -366,7 +364,45 @@ describe("over_under", () => {
     console.log("new global round: ", globalAccount2.round.toString());
     console.log("new global number: ", globalAccount2.number.toString());
   });
+
+  // close a bet, anyone can sign, only the bet.player can be paid out though
+  it("Bet Closed!", async () => {
+    // Hardcoded values
+    const hardcodedRoundNumber = 1; // Example hardcoded round number
+    const hardcodedPlayerPubkey = keypair.publicKey
+
+    // Convert hardcoded round number to buffer
+    const _roundBN = new BN(hardcodedRoundNumber);
+    const _roundBuffer = _roundBN.toArrayLike(Buffer, "le", 8);
+
+    // Derive the round PDA using the hardcoded round number
+    const [round] = web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("round"), global.toBuffer(), _roundBuffer],
+      program.programId
+    );
+
+    // Derive the bet PDA using the hardcoded player public key
+    const [bet] = web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("bet"), round.toBuffer(), hardcodedPlayerPubkey.toBuffer()],
+      program.programId
+    );
+
+    // Fetch the bet account using the derived PDA
+    const betAccount = await program.account.bet.fetch(bet);
+    let player = betAccount.player;
+    console.log("bet pda: ", bet.toString());
+    console.log("player: ", player.toString());
+
+    // Close the bet using the hardcoded values
+    const tx = await program.methods
+      .closeBet()
+      .accounts({
+        player: hardcodedPlayerPubkey, // Use the hardcoded player public key
+        bet,
+      })
+      .signers([keypair])
+      .rpc()
+      .then(confirm)
+      .then(log);
+  });
 });
-function Some(bets: anchor.web3.PublicKey[], arg1: (betAccount: any) => void) {
-  throw new Error("Function not implemented.");
-} 

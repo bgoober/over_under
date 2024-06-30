@@ -17,8 +17,6 @@ declare_id!("3qzsebktNn3EJCxjoCmmbHnu62x3ebGpKuyv5qBxLp8V");
 #[program]
 pub mod over_under {
 
-    use anchor_lang::system_program::{transfer, Transfer};
-
     use super::*;
 
     pub fn init_global(ctx: Context<GlobalC>) -> Result<()> {
@@ -52,57 +50,40 @@ pub mod over_under {
     }
 
     pub fn assess_winners(ctx: Context<AssessWinnersC>) -> Result<()> {
-        if ctx.accounts.round.outcome == 2 {
-            // make a cpi transfer from the vault to the House account for the entire vault lamports
-            let cpi_program = ctx.accounts.system_program.to_account_info();
-            let cpi_accounts = Transfer {
-                from: ctx.accounts.vault.to_account_info(),
-                to: ctx.accounts.house.to_account_info(),
-            };
+        let mut total_winners_pot = 0;
+        let mut winner_accounts = Vec::new();
 
-            let seeds = &[b"vault", ctx.accounts.round.to_account_info().key.as_ref()];
-            let signer = &[&seeds[..]];
+        let vault = ctx.accounts.vault.lamports();
 
-            let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts).with_signer(signer);
+        for account in ctx.remaining_accounts.iter() {
+            let _account_key = account.key();
+            let data = account.try_borrow_mut_data()?;
 
-            transfer(cpi_ctx, ctx.accounts.vault.lamports())?;
-        } else {
-            let mut total_winners_pot = 0;
-            let mut winner_accounts = Vec::new();
+            //Deserialize the data from the account and save it in an Account variable
+            let account_to_write =
+                Bet::try_deserialize(&mut data.as_ref()).expect("Error Deserializing Data");
 
-            let vault = ctx.accounts.vault.lamports();
-
-            for account in ctx.remaining_accounts.iter() {
-                let _account_key = account.key();
-                let data = account.try_borrow_mut_data()?;
-
-                //Deserialize the data from the account and save it in an Account variable
-                let account_to_write =
-                    Bet::try_deserialize(&mut data.as_ref()).expect("Error Deserializing Data");
-
-                if account_to_write.bet == ctx.accounts.round.outcome {
-                    total_winners_pot += account_to_write.amount;
-                    winner_accounts.push((account.key(), account_to_write));
-                }
-            }
-
-            // Apply collected changes outside the previous loop
-            for (account, account_to_write) in winner_accounts.iter_mut() {
-                let payout = (account_to_write.amount as u64 / total_winners_pot) * vault; // Ensure correct division
-                account_to_write.payout = payout;
-
-                // Find the account by account_key to serialize data back
-                if let Some(account) = ctx
-                    .remaining_accounts
-                    .iter()
-                    .find(|a| a.key() == account.key())
-                {
-                    let mut data = account.try_borrow_mut_data()?;
-                    let _ = account_to_write.try_serialize(&mut data.as_mut());
-                }
+            if account_to_write.bet == ctx.accounts.round.outcome {
+                total_winners_pot += account_to_write.amount;
+                winner_accounts.push((account.key(), account_to_write));
             }
         }
 
+        // Apply collected changes outside the previous loop
+        for (account, account_to_write) in winner_accounts.iter_mut() {
+            let payout = (account_to_write.amount as u64 / total_winners_pot) * vault; // Ensure correct division
+            account_to_write.payout = payout;
+
+            // Find the account by account_key to serialize data back
+            if let Some(account) = ctx
+                .remaining_accounts
+                .iter()
+                .find(|a| a.key() == account.key())
+            {
+                let mut data = account.try_borrow_mut_data()?;
+                let _ = account_to_write.try_serialize(&mut data.as_mut());
+            }
+        }
         Ok(())
     }
 
@@ -113,6 +94,11 @@ pub mod over_under {
 
     pub fn close_round(ctx: Context<CloseRoundC>) -> Result<()> {
         ctx.accounts.close_round()?;
+        Ok(())
+    }
+
+    pub fn close_bet(ctx: Context<CloseBetC>) -> Result<()> {
+        let _ctx = ctx;
         Ok(())
     }
 }

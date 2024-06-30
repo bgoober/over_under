@@ -42,7 +42,7 @@ pub struct PayC<'info> {
     )]
     pub global: Account<'info, Global>,
 
-    #[account(
+    #[account(mut, close = house,
         seeds = [b"round", global.key().as_ref(), global.round.to_le_bytes().as_ref()],
         bump
     )]
@@ -79,38 +79,66 @@ pub struct PayC<'info> {
 
 impl<'info> PayC<'info> {
     pub fn payout(&mut self) -> Result<()> {
-        let player_bets = vec![
-            (self.player1.as_ref(), self.bet1.as_ref()),
-            (self.player2.as_ref(), self.bet2.as_ref()),
-            (self.player3.as_ref(), self.bet3.as_ref()),
-            (self.player4.as_ref(), self.bet4.as_ref()),
-            (self.player5.as_ref(), self.bet5.as_ref()),
-            (self.player6.as_ref(), self.bet6.as_ref()),
-            (self.player7.as_ref(), self.bet7.as_ref()),
-            (self.player8.as_ref(), self.bet8.as_ref()),
-            (self.player9.as_ref(), self.bet9.as_ref()),
-            (self.player10.as_ref(), self.bet10.as_ref()),
-        ];
+        if self.round.outcome == 2 {
+            // make a cpi transfer from the vault to the House account for the entire vault lamports
+            let cpi_accounts = Transfer {
+                from: self.vault.to_account_info(),
+                to: self.house.to_account_info(),
+            };
 
-        for (player_option, bet_option) in player_bets.iter() {
-            if let (Some(player), Some(bet)) = (player_option, bet_option) {
-                if bet.player.key() == player.key() {
-                    if bet.payout > 0 {
-                        let from_account_info = self.vault.to_account_info();
-                        let to_account_info = player.to_account_info();
-                        let amount = bet.payout;
-                        let cpi_accounts = Transfer {
-                            from: from_account_info.clone(),
-                            to: to_account_info,
-                        };
+            let cpi_program = self.system_program.to_account_info();
+            let seeds = &[
+                b"vault",
+                self.round.to_account_info().key.as_ref(),
+                &[self.round.vault_bump],
+            ];
+            let signer = &[&seeds[..]];
 
-                        let cpi_program = self.system_program.to_account_info();
-                        let seeds = &[b"vault", self.round.to_account_info().key.as_ref()];
-                        let signer = &[&seeds[..]];
+            let cpi_ctx = CpiContext::new_with_signer(cpi_program.clone(), cpi_accounts, signer);
 
-                        let cpi_ctx =
-                            CpiContext::new_with_signer(cpi_program.clone(), cpi_accounts, signer);
-                        transfer(cpi_ctx, amount)?;
+            let amount = self.vault.lamports();
+            transfer(cpi_ctx, amount)?;
+        } else {
+            let player_bets = vec![
+                (self.player1.as_ref(), self.bet1.as_ref()),
+                (self.player2.as_ref(), self.bet2.as_ref()),
+                (self.player3.as_ref(), self.bet3.as_ref()),
+                (self.player4.as_ref(), self.bet4.as_ref()),
+                (self.player5.as_ref(), self.bet5.as_ref()),
+                (self.player6.as_ref(), self.bet6.as_ref()),
+                (self.player7.as_ref(), self.bet7.as_ref()),
+                (self.player8.as_ref(), self.bet8.as_ref()),
+                (self.player9.as_ref(), self.bet9.as_ref()),
+                (self.player10.as_ref(), self.bet10.as_ref()),
+            ];
+
+            for (player_option, bet_option) in player_bets.iter() {
+                if let (Some(player), Some(bet)) = (player_option, bet_option) {
+                    if bet.player.key() == player.key() {
+                        if bet.payout > 0 {
+                            let from_account_info = self.vault.to_account_info();
+                            let to_account_info = player.to_account_info();
+                            let amount = bet.payout;
+                            let cpi_accounts = Transfer {
+                                from: from_account_info.clone(),
+                                to: to_account_info,
+                            };
+
+                            let cpi_program = self.system_program.to_account_info();
+                            let seeds = &[
+                                b"vault",
+                                self.round.to_account_info().key.as_ref(),
+                                &[self.round.vault_bump],
+                            ];
+                            let signer = &[&seeds[..]];
+
+                            let cpi_ctx = CpiContext::new_with_signer(
+                                cpi_program.clone(),
+                                cpi_accounts,
+                                signer,
+                            );
+                            transfer(cpi_ctx, amount)?;
+                        }
                     }
                 }
             }

@@ -7,10 +7,10 @@ use crate::errors::Error;
 #[derive(Accounts)]
 pub struct CloseRoundC<'info> {
     // signer
-    #[account(mut)]
+    #[account(mut, address = global.auth)]
     pub thread: Signer<'info>,
 
-    #[account(mut, constraint = house.key() == global.auth.key())]
+    #[account(mut)]
     pub house: SystemAccount<'info>,
 
     // global as ref
@@ -25,7 +25,7 @@ pub struct CloseRoundC<'info> {
         seeds = [b"round", global.key().as_ref(), global.round.to_le_bytes().as_ref()],
         bump = round.bump
     )]
-    pub round: Account<'info, Round>,
+    pub round: Box<Account<'info, Round>>,
 
     // system program
     pub system_program: Program<'info, System>,

@@ -29,7 +29,7 @@ pub struct PlayRoundC<'info> {
 
     // round the player is placing a bet in,
     #[account(mut, seeds = [b"round", global.key().as_ref(), global.round.to_le_bytes().as_ref()], bump = round.bump)]
-    pub round: Account<'info, Round>,
+    pub round: Box<Account<'info, Round>>,
 
     // vault pda of the round account
     #[account(mut, seeds = [b"vault", round.key().as_ref()], bump = round.vault_bump)]
@@ -74,10 +74,10 @@ impl<'info> PlayRoundC<'info> {
             Error::Ed25519Signature
         );
 
-        msg!("signature.message: {:#?}", signature.message.as_ref().unwrap());
+        //msg!("signature.message: {:#?}", signature.message.as_ref().unwrap());
 
         // print self.round.to_slice()
-        msg!("self.round.to_slice(): {:#?}", self.round.to_slice());
+        //msg!("self.round.to_slice(): {:#?}", self.round.to_slice());
 
         // Ensure messages match
         require!(

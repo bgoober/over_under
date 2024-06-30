@@ -48,7 +48,12 @@ describe("over_under", () => {
   it("Global initialized!", async () => {
     // Add your test here.
     try {
-      const tx = await program.methods.initGlobal().accounts({ global }).rpc().then(confirm).then(log);
+      const tx = await program.methods
+        .initGlobal()
+        .accounts({ global, house: keypair.publicKey })
+        .rpc()
+        .then(confirm)
+        .then(log);
     } catch (error) {
       if (error.message.includes("already in use")) {
         // Accept the error and continue
@@ -57,17 +62,13 @@ describe("over_under", () => {
         throw error;
       }
     }
-
   });
 
   // initRound
   it("Round initialized!", async () => {
     const globalAccount = await program.account.global.fetch(global);
 
-    console.log(
-      `global round: `,
-      globalAccount.round.toString()
-    );
+    console.log(`global round: `, globalAccount.round.toString());
 
     // Use a BN object for operations requiring BN
     const _roundBN = new BN(globalAccount.round.toString());
@@ -113,17 +114,17 @@ describe("over_under", () => {
     const roundAccount = await program.account.round.fetch(round);
     console.log(`round: `, roundAccount.round.toString());
 
-    console.log(
-      `global round: `,
-      globalAccount.round.toString()
-    );
+    console.log(`global round: `, globalAccount.round.toString());
 
     let round_number = roundAccount.round.toNumber();
+    console.log(`round number: `, round_number);
 
+    // This should be the player's public key or similar identifier
     const [bet] = web3.PublicKey.findProgramAddressSync(
       [Buffer.from("bet"), round.toBuffer(), keypair.publicKey.toBuffer()],
       program.programId
     );
+    console.log(`bet: `, bet.toString());
 
     // Assuming BN is already imported
     // Convert the first and third arguments to BN
@@ -139,6 +140,7 @@ describe("over_under", () => {
         vault,
         bet,
         player: keypair.publicKey,
+        systemProgram: SystemProgram.programId,
       })
       .signers([keypair])
       .rpc()
@@ -151,10 +153,8 @@ describe("over_under", () => {
     console.log(`bet amount: `, betAccount.amount.toString());
     console.log("bet: ", betAccount.bet.toString());
     // log the round.bets length
-    console.log(
-      `round2 bets length: `,
-      roundAccount2.bets.length
-    );
+    console.log(`round2 bets length: `, roundAccount2.bets.length);
+    console.log("round2 players: ", roundAccount2.players);
     console.log("round2 bets: ", roundAccount2.bets);
   });
 
@@ -179,10 +179,7 @@ describe("over_under", () => {
     const roundAccount = await program.account.round.fetch(round);
     console.log(`round: `, roundAccount.round.toString());
 
-    console.log(
-      `global round: }`,
-      globalAccount.round.toString()
-    );
+    console.log(`global round: }`, globalAccount.round.toString());
 
     let account = await anchor
       .getProvider()
@@ -210,7 +207,6 @@ describe("over_under", () => {
     await sendAndConfirmTransaction(program.provider.connection, tx, [keypair])
       .then(log)
       .catch((error) => console.error("Transaction # Error:", error));
-
   });
 
   it("Winners Assessed!", async () => {
@@ -237,22 +233,21 @@ describe("over_under", () => {
       isWritable: true,
     }));
 
-      const tx = await program.methods
-        .assessWinners()
-        .accounts({
-          house: keypair.publicKey,
-          global,
-          round,
-          vault,
-          systemProgram: SystemProgram.programId,
-        })
-        .remainingAccounts([...remainingAccounts])
-        .signers([keypair])
-        .rpc()
-        .then(confirm)
-        .then(log);
-    }
-)
+    const tx = await program.methods
+      .assessWinners()
+      .accounts({
+        house: keypair.publicKey,
+        global,
+        round,
+        vault,
+        systemProgram: SystemProgram.programId,
+      })
+      .remainingAccounts([...remainingAccounts])
+      .signers([keypair])
+      .rpc()
+      .then(confirm)
+      .then(log);
+  });
 
   it("Payed Out!", async () => {
     // Fetch the global account
@@ -276,7 +271,7 @@ describe("over_under", () => {
     );
     const roundAccount = await program.account.round.fetch(round);
     console.log(`round: `, roundAccount.round.toString());
-    
+
     const [bet] = web3.PublicKey.findProgramAddressSync(
       [Buffer.from("bet"), round.toBuffer(), keypair.publicKey.toBuffer()],
       program.programId
@@ -289,17 +284,46 @@ describe("over_under", () => {
     console.log("bet made in round: ", betAccount.round.toString());
     console.log("bet payout: ", betAccount.payout.toString());
 
+    /// DOCS: The ACCOUNTS object is constructed from required accounts + dynamically derived bet accounts for each round
+    // Initialize the ACCOUNTS object with required accounts
+    const ACCOUNTS = {
+      house: keypair.publicKey,
+      global,
+      round,
+      vault,
+      systemProgram: SystemProgram.programId,
+    };
+
+    // Main logic to populate ACCOUNTS with player# and bet#
+    const maxPlayers = 10; // Maximum number of players
+    for (let i = 0; i < maxPlayers; i++) {
+      if (i < roundAccount.players.length && i < roundAccount.bets.length) {
+        // Directly use the playerPublicKey and betPublicKey from the vectors
+        const playerPublicKey = roundAccount.players[i];
+        const betPublicKey = roundAccount.bets[i];
+        // Store the player public key and bet public key in ACCOUNTS
+        ACCOUNTS[`player${i + 1}`] = playerPublicKey;
+        ACCOUNTS[`bet${i + 1}`] = betPublicKey;
+      } else {
+        // Populate the remaining slots with null if any
+        ACCOUNTS[`player${i + 1}`] = null;
+        ACCOUNTS[`bet${i + 1}`] = null;
+      }
+    }
+    // console.log("ACCOUNTS: ", ACCOUNTS);
+    // console.log("ACCOUNTS length: ", Object.keys(ACCOUNTS).length);
+    // console.log("ACCOUNTS keys: ", Object.keys(ACCOUNTS));
+    // console.log("ACCOUNTS values: ", Object.values(ACCOUNTS));
+    // console.log("ACCOUNTS entries: ", Object.entries(ACCOUNTS));
+    // console.log("ACCOUNTS player1: ", ACCOUNTS[0]);
+    // console.log("ACCOUNTS bet1: ", ACCOUNTS[0]);
+    // console.log("ACCOUNTS player2: ", ACCOUNTS[1]);
+    // console.log("ACCOUNTS bet2: ", ACCOUNTS[1]);
+
+    // Construct the instruction with the populated ACCOUNTS object
     const tx = await program.methods
-      .payout() // Use BN objects for the first and third arguments
-      .accounts({
-        house: keypair.publicKey,
-        global: global,
-        round,
-        vault,
-        bet,
-        player: keypair.publicKey,
-        systemProgram: SystemProgram.programId,
-      })
+      .payout()
+      .accounts(ACCOUNTS)
       .rpc()
       .then(confirm)
       .then(log);
@@ -311,7 +335,6 @@ describe("over_under", () => {
 
     console.log("old global round: ", globalAccount.round.toString());
     console.log("old global number: ", globalAccount.number.toString());
-
 
     const _roundBN = new BN(globalAccount.round.toString());
 
@@ -340,5 +363,46 @@ describe("over_under", () => {
     const globalAccount2 = await program.account.global.fetch(global);
     console.log("new global round: ", globalAccount2.round.toString());
     console.log("new global number: ", globalAccount2.number.toString());
+  });
+
+  // close a bet, anyone can sign, only the bet.player can be paid out though
+  it("Bet Closed!", async () => {
+    // Hardcoded values
+    const hardcodedRoundNumber = 1; // Example hardcoded round number
+    const hardcodedPlayerPubkey = keypair.publicKey
+
+    // Convert hardcoded round number to buffer
+    const _roundBN = new BN(hardcodedRoundNumber);
+    const _roundBuffer = _roundBN.toArrayLike(Buffer, "le", 8);
+
+    // Derive the round PDA using the hardcoded round number
+    const [round] = web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("round"), global.toBuffer(), _roundBuffer],
+      program.programId
+    );
+
+    // Derive the bet PDA using the hardcoded player public key
+    const [bet] = web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("bet"), round.toBuffer(), hardcodedPlayerPubkey.toBuffer()],
+      program.programId
+    );
+
+    // Fetch the bet account using the derived PDA
+    const betAccount = await program.account.bet.fetch(bet);
+    let player = betAccount.player;
+    console.log("bet pda: ", bet.toString());
+    console.log("player: ", player.toString());
+
+    // Close the bet using the hardcoded values
+    const tx = await program.methods
+      .closeBet()
+      .accounts({
+        player: hardcodedPlayerPubkey, // Use the hardcoded player public key
+        bet,
+      })
+      .signers([keypair])
+      .rpc()
+      .then(confirm)
+      .then(log);
   });
 });

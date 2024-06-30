@@ -18,3 +18,6 @@ pub use close_round::*;
 
 pub mod assess_winners;
 pub use assess_winners::*;
+
+pub mod close_bet;
+pub use close_bet::*;

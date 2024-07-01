@@ -329,41 +329,42 @@ describe("over_under", () => {
       .then(log);
   });
 
-  it("Round is Closed!", async () => {
-    // fetch global
-    const globalAccount = await program.account.global.fetch(global);
+  // this test passes, but is no longer necessary do you the round now being closed in the payout context
+  // it("Round is Closed!", async () => {
+  //   // fetch global
+  //   const globalAccount = await program.account.global.fetch(global);
 
-    console.log("old global round: ", globalAccount.round.toString());
-    console.log("old global number: ", globalAccount.number.toString());
+  //   console.log("old global round: ", globalAccount.round.toString());
+  //   console.log("old global number: ", globalAccount.number.toString());
 
-    const _roundBN = new BN(globalAccount.round.toString());
+  //   const _roundBN = new BN(globalAccount.round.toString());
 
-    // Convert to 8-byte Buffer in little-endian for other operations
-    const _roundBuffer = _roundBN.toArrayLike(Buffer, "le", 8);
+  //   // Convert to 8-byte Buffer in little-endian for other operations
+  //   const _roundBuffer = _roundBN.toArrayLike(Buffer, "le", 8);
 
-    const [round] = web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("round"), global.toBuffer(), _roundBuffer],
-      program.programId
-    );
+  //   const [round] = web3.PublicKey.findProgramAddressSync(
+  //     [Buffer.from("round"), global.toBuffer(), _roundBuffer],
+  //     program.programId
+  //   );
 
-    const tx = await program.methods
-      .closeRound() // Use BN objects for the first and third arguments
-      .accounts({
-        house: keypair.publicKey,
-        global,
-        round,
-        systemProgram: SystemProgram.programId,
-      })
-      .signers([keypair])
-      .rpc()
-      .then(confirm)
-      .then(log);
+  //   const tx = await program.methods
+  //     .closeRound() // Use BN objects for the first and third arguments
+  //     .accounts({
+  //       house: keypair.publicKey,
+  //       global,
+  //       round,
+  //       systemProgram: SystemProgram.programId,
+  //     })
+  //     .signers([keypair])
+  //     .rpc()
+  //     .then(confirm)
+  //     .then(log);
 
-    // fetch global
-    const globalAccount2 = await program.account.global.fetch(global);
-    console.log("new global round: ", globalAccount2.round.toString());
-    console.log("new global number: ", globalAccount2.number.toString());
-  });
+  //   // fetch global
+  //   const globalAccount2 = await program.account.global.fetch(global);
+  //   console.log("new global round: ", globalAccount2.round.toString());
+  //   console.log("new global number: ", globalAccount2.number.toString());
+  // });
 
   // close a bet, anyone can sign, only the bet.player can be paid out though
   it("Bet Closed!", async () => {

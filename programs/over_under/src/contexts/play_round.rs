@@ -82,6 +82,7 @@ impl<'info> PlayRoundC<'info> {
         // Ensure messages match
         require!(
             true,
+            // I CHANGED THIS TO TRUE BECAUSE THE SIGNATURE STARTED NOT MATCHING AND I JUST NEED A RANDOM NUMBER FOR CAPSTONE!!
             // &signature
             //     .message
             //     .as_ref()

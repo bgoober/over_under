@@ -1,12 +1,14 @@
 'use client';
 
 import { useConnection } from '@solana/wallet-adapter-react';
-import { IconTrash } from '@tabler/icons-react';
+import { IconAddressBook, IconTrash } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { ReactNode, useState } from 'react';
 import { AppModal } from '../ui/ui-layout';
 import { ClusterNetwork, useCluster } from './cluster-data-access';
 import { Connection } from '@solana/web3.js';
+import ReactMarkdown from 'react-markdown';
+
 
 export function ExplorerLink({
   path,
@@ -88,6 +90,41 @@ export function ClusterUiSelect() {
   );
 }
 
+export function ExplainerUiModal({
+  hideModal,
+  show,
+}: {
+  hideModal: () => void;
+  show: boolean;
+}) {
+  const markdown = `
+  # Over / Under
+
+  - A random number 0-100 is generated every Round.
+  - Players bet on whether the outcome of current Round's Random Number
+    - higher (over) than the previous Round's Random Number.
+    - lower (under) than the previous Round's Random Number.
+  - Losers pay Winners.
+  - player_winnings = (player_bet / winning_bets_sum)*total_pot
+  - If the random number is the same as the previous number, the House wins the entire pot. 
+  - No fees are taken by the House in any form.
+
+  [Link to GitHub](https://github.com/bgoober/over_under)
+  `;
+
+  return (
+    <AppModal
+      title="Explainer"
+      hide={hideModal}
+      show={show}
+      submit={hideModal} // Assuming you want to close the modal on submit. Adjust as needed.
+      submitLabel="Close"
+    >
+      <ReactMarkdown>{markdown}</ReactMarkdown>
+    </AppModal>
+  );
+}
+
 export function ClusterUiModal({
   hideModal,
   show,
@@ -151,56 +188,110 @@ export function ClusterUiModal({
 export function ClusterUiTable() {
   const { clusters, setCluster, deleteCluster } = useCluster();
   return (
-    <div className="overflow-x-auto">
-      <table className="table border-4 border-separate border-base-300">
-        <thead>
-          <tr>
-            <th>Name/ Network / Endpoint</th>
-            <th className="text-center">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {clusters.map((item) => (
-            <tr key={item.name} className={item?.active ? 'bg-base-200' : ''}>
-              <td className="space-y-2">
-                <div className="whitespace-nowrap space-x-2">
-                  <span className="text-xl">
-                    {item?.active ? (
-                      item.name
-                    ) : (
-                      <button
-                        title="Select cluster"
-                        className="link link-secondary"
-                        onClick={() => setCluster(item)}
-                      >
-                        {item.name}
-                      </button>
-                    )}
-                  </span>
-                </div>
-                <span className="text-xs">
-                  Network: {item.network ?? 'custom'}
-                </span>
-                <div className="whitespace-nowrap text-gray-500 text-xs">
-                  {item.endpoint}
-                </div>
-              </td>
-              <td className="space-x-2 whitespace-nowrap text-center">
-                <button
-                  disabled={item?.active}
-                  className="btn btn-xs btn-default btn-outline"
-                  onClick={() => {
-                    if (!window.confirm('Are you sure?')) return;
-                    deleteCluster(item);
-                  }}
-                >
-                  <IconTrash size={16} />
-                </button>
-              </td>
+    <div className="flex flex-wrap justify-around">
+      <div className="overflow-x-auto">
+        <table className="table border-4 border-separate border-base-300">
+          <thead>
+            <tr>
+              <th>Global Account:</th>
+              <th className="text-center">Account</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {clusters.map((item) => (
+              <tr key={item.name} className={item?.active ? 'bg-base-200' : ''}>
+                <td className="space-y-2">
+                  <div className="whitespace-nowrap space-x-2">
+                    <span className="text-xl">
+                      {item?.active ? (
+                        item.name
+                      ) : (
+                        <button
+                          title="Select cluster"
+                          className="link link-secondary"
+                          onClick={() => setCluster(item)}
+                        >
+                          {item.name}
+                        </button>
+                      )}
+                    </span>
+                  </div>
+                  {/* <span className="text-xs">
+                    Network: {item.network ?? 'custom'}
+                  </span> */}
+                  {/* <div className="whitespace-nowrap text-gray-500 text-xs">
+                    {item.endpoint}
+                  </div> */}
+                </td>
+                <td className="space-x-2 whitespace-nowrap text-center">
+                  <button
+                    disabled={item?.active}
+                    className="btn btn-xs btn-default btn-outline"
+                    onClick={() => {
+                      if (!window.confirm('Are you sure?')) return;
+                      deleteCluster(item);
+                    }}
+                  >
+                    <IconAddressBook size={16} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      
+      <div className="overflow-x-auto">
+        <table className="table border-4 border-separate border-base-300">
+          <thead>
+            <tr>
+              <th>Round Accounts:</th>
+              <th className="text-center">Accounts</th>
+            </tr>
+          </thead>
+          <tbody>
+            {clusters.map((item) => (
+              <tr key={item.name} className={item?.active ? 'bg-base-200' : ''}>
+                <td className="space-y-2">
+                  <div className="whitespace-nowrap space-x-2">
+                    <span className="text-xl">
+                      {item?.active ? (
+                        item.name
+                      ) : (
+                        <button
+                          title="Select cluster"
+                          className="link link-secondary"
+                          onClick={() => setCluster(item)}
+                        >
+                          {item.name}
+                        </button>
+                      )}
+                    </span>
+                  </div>
+                  {/* <span className="text-xs">
+                    Network: {item.network ?? 'custom'}
+                  </span> */}
+                  {/* <div className="whitespace-nowrap text-gray-500 text-xs">
+                    {item.endpoint}
+                  </div> */}
+                </td>
+                <td className="space-x-2 whitespace-nowrap text-center">
+                  <button
+                    disabled={item?.active}
+                    className="btn btn-xs btn-default btn-outline"
+                    onClick={() => {
+                      if (!window.confirm('Are you sure?')) return;
+                      deleteCluster(item);
+                    }}
+                  >
+                    <IconAddressBook size={16} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

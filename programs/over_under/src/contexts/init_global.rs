@@ -24,7 +24,7 @@ impl<'info> GlobalC<'info> {
         self.global.set_inner( Global {
             auth: self.thread.key(),
             round: 1,
-            number: 50,
+            number: 500,
             bump: *bumps.get("global").unwrap(),
         });
         Ok(())

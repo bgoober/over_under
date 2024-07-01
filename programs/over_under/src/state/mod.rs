@@ -14,18 +14,18 @@ use anchor_lang::prelude::*;
 pub struct Global {
     pub auth: Pubkey, // the pubkey of the signer of init global
     pub round: u64, // to store the global round
-    pub number: u8, // to store the random number of the previous round
+    pub number: u16, // to store the random number of the previous round
     pub bump: u8, // the bump used to generate the global PDA
 }
 
 impl Global {
-    pub const LEN: usize = 8+32+8+1+1;
+    pub const LEN: usize = 8+32+8+2+1;
 }
 
 #[account]
 pub struct Round {
     pub round: u64, // the round number 
-    pub number: u8, // the random number of the round
+    pub number: u16, // the random number of the round
     pub bump: u8, // the bump used to generate the round PDA
     pub vault_bump: u8, // the bump used to generate the vault PDA
     pub outcome: u8, // the outcome of the user's bet vs the number drawn. evaluated and updated in resolve round
@@ -34,11 +34,13 @@ pub struct Round {
 }
 
 impl Round { 
-    pub const LEN: usize = 8+8+1+(4+(32*10))+(4+(32*10))+1+1+1;
+    pub const LEN: usize = 8+8+2+(4+(32*10))+(4+(32*10))+1+1+1;
 
     pub fn to_slice(&self) -> Vec<u8> {
         let mut s = self.round.to_le_bytes().to_vec();
-        s.extend_from_slice(&[self.number, self.bump, self.outcome, self.vault_bump]);
+        s.extend_from_slice(&[self.bump, self.outcome, self.vault_bump]);
+
+        s.extend_from_slice(&self.number.to_le_bytes());
         
         // Serialize the length of the bets vector as a 32-bit unsigned integer (u32)
         let bets_length = self.bets.len() as u32;

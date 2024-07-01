@@ -107,7 +107,7 @@ impl<'info> PlayRoundC<'info> {
             let upper = u128::from_le_bytes(hash_16);
 
             // produce a number 0-100
-            let roll = lower.wrapping_add(upper).wrapping_rem(101) as u8;
+            let roll = lower.wrapping_add(upper).wrapping_rem(1001) as u16;
 
             msg!("Roll: {:?}", roll);
 

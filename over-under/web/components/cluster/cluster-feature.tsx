@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { AppHero } from '../ui/ui-layout';
-import { ClusterUiModal } from './cluster-ui';
+import { ClusterUiModal, ExplainerUiModal } from './cluster-ui';
 import { ClusterUiTable } from './cluster-ui';
 
 export default function ClusterFeature() {
@@ -11,10 +11,10 @@ export default function ClusterFeature() {
   return (
     <div>
       <AppHero
-        title="Clusters"
-        subtitle="Manage and select your Solana clusters"
+        title="Game History"
+        subtitle="Global, and Round information only. For user bets see User Accounts."
       >
-        <ClusterUiModal
+        <ExplainerUiModal
           show={showModal}
           hideModal={() => setShowModal(false)}
         />
@@ -22,7 +22,7 @@ export default function ClusterFeature() {
           className="btn btn-xs lg:btn-md btn-primary"
           onClick={() => setShowModal(true)}
         >
-          Add Cluster
+          How the Game Works
         </button>
       </AppHero>
       <ClusterUiTable />

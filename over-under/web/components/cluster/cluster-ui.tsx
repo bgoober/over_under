@@ -90,6 +90,7 @@ export function ClusterUiSelect() {
   );
 }
 
+// for the global button modal
 export function ExplainerUiModal({
   hideModal,
   show,
@@ -100,14 +101,16 @@ export function ExplainerUiModal({
   const markdown = `
   # Over / Under
 
-  - A random number 0-100 is generated every Round.
-  - Players bet on whether the outcome of current Round's Random Number
-    - higher (over) than the previous Round's Random Number.
-    - lower (under) than the previous Round's Random Number.
-  - Losers pay Winners.
-  - player_winnings = (player_bet / winning_bets_sum)*total_pot
-  - If the random number is the same as the previous number, the House wins the entire pot. 
-  - No fees are taken by the House in any form.
+  ### 1. A random number 0-1000 is generated every Round.
+  ### 2. Players bet on whether the outcome of current Round's Random Number will be:
+  -- higher than (over) the previous Round's Random Number. --
+
+                            or                                
+  -- lower than (under) the previous Round's Random Number. --
+  ### 3. Losers pay Winners.
+  ### 4. player_winnings = (player_bet / winning_bets_sum) * total_pot
+  ### 5. If the random number is the same as the previous number, the House wins the entire pot. 
+  ### 6. This is the House's only win condition and there are no fees taken by the House in any other form.
 
   [Link to GitHub](https://github.com/bgoober/over_under)
   `;
@@ -117,14 +120,13 @@ export function ExplainerUiModal({
       title="Explainer"
       hide={hideModal}
       show={show}
-      submit={hideModal} // Assuming you want to close the modal on submit. Adjust as needed.
-      submitLabel="Close"
     >
       <ReactMarkdown>{markdown}</ReactMarkdown>
     </AppModal>
   );
 }
 
+// not used
 export function ClusterUiModal({
   hideModal,
   show,
@@ -185,6 +187,7 @@ export function ClusterUiModal({
   );
 }
 
+// for global
 export function ClusterUiTable() {
   const { clusters, setCluster, deleteCluster } = useCluster();
   return (

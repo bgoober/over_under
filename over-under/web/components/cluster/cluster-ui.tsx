@@ -233,7 +233,7 @@ export function ClusterUiTable() {
                     onClick={() => {
                       if (!window.confirm('Are you sure?')) return;
                       deleteCluster(item);
-                    }}
+                    }} 
                   >
                     <IconAddressBook size={16} />
                   </button>

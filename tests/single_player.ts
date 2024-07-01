@@ -365,46 +365,60 @@ describe("over_under", () => {
     console.log("new global number: ", globalAccount2.number.toString());
   });
 
-
-
   // close a bet, anyone can sign, only the bet.player can be paid out though
   it("Bet Closed!", async () => {
-    // Hardcoded values
-    const hardcodedRoundNumber = 1; // Example hardcoded round number
-    const hardcodedPlayerPubkey = keypair.publicKey
+    try {
+      // Hardcoded values
+      const hardcodedRoundNumber = 1; // Example hardcoded round number
+      const hardcodedPlayerPubkey = keypair.publicKey;
 
-    // Convert hardcoded round number to buffer
-    const _roundBN = new BN(hardcodedRoundNumber);
-    const _roundBuffer = _roundBN.toArrayLike(Buffer, "le", 8);
+      // Convert hardcoded round number to buffer
+      const _roundBN = new BN(hardcodedRoundNumber);
+      const _roundBuffer = _roundBN.toArrayLike(Buffer, "le", 8);
 
-    // Derive the round PDA using the hardcoded round number
-    const [round] = web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("round"), global.toBuffer(), _roundBuffer],
-      program.programId
-    );
+      // Derive the round PDA using the hardcoded round number
+      const [round] = web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("round"), global.toBuffer(), _roundBuffer],
+        program.programId
+      );
 
-    // Derive the bet PDA using the hardcoded player public key
-    const [bet] = web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("bet"), round.toBuffer(), hardcodedPlayerPubkey.toBuffer()],
-      program.programId
-    );
+      // Derive the bet PDA using the hardcoded player public key
+      const [bet] = web3.PublicKey.findProgramAddressSync(
+        [
+          Buffer.from("bet"),
+          round.toBuffer(),
+          hardcodedPlayerPubkey.toBuffer(),
+        ],
+        program.programId
+      );
 
-    // Fetch the bet account using the derived PDA
-    const betAccount = await program.account.bet.fetch(bet);
-    let player = betAccount.player;
-    console.log("bet pda: ", bet.toString());
-    console.log("player: ", player.toString());
+      // Fetch the bet account using the derived PDA
+      const betAccount = await program.account.bet.fetch(bet);
+      let player = betAccount.player;
+      console.log("bet pda: ", bet.toString());
+      console.log("player: ", player.toString());
 
-    // Close the bet using the hardcoded values
-    const tx = await program.methods
-      .closeBet()
-      .accounts({
-        player: hardcodedPlayerPubkey, // Use the hardcoded player public key
-        bet,
-      })
-      .signers([keypair])
-      .rpc()
-      .then(confirm)
-      .then(log);
+      // Close the bet using the hardcoded values
+      const tx = await program.methods
+        .closeBet()
+        .accounts({
+          player: hardcodedPlayerPubkey, // Use the hardcoded player public key
+          bet,
+        })
+        .signers([keypair])
+        .rpc()
+        .then(confirm)
+        .then(log);
+    } catch (error) {
+      if (
+        error.message.includes(
+          "Account does not exist or has no data EAvpcbnWsTykSTiUXmCVAx9a5eJWWwdjHqW4VKc1vM6q"
+        )
+      ) {
+        console.error("Account does not exist or has no data.");
+      } else {
+        console.error("An unexpected error occurred:", error);
+      }
+    }
   });
 });

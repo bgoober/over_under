@@ -40,8 +40,6 @@ impl Round {
     pub fn to_slice(&self) -> Vec<u8> {
         let mut s = self.round.to_le_bytes().to_vec();
         s.extend_from_slice(&[self.bump, self.outcome, self.vault_bump]);
-
-        s.extend_from_slice(&self.number.to_le_bytes());
         
         // Serialize the length of the bets vector as a 32-bit unsigned integer (u32)
         let bets_length = self.bets.len() as u32;

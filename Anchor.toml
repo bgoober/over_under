@@ -15,5 +15,9 @@ cluster = "Localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
+<<<<<<< HEAD
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+=======
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/single_player.ts"
+>>>>>>> b58285a (committing what I can here, although I don't know)
 sb = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/sb.ts"

@@ -22,7 +22,7 @@ export default function ClusterFeature() {
           className="btn btn-xs lg:btn-md btn-primary"
           onClick={() => setShowModal(true)}
         >
-          How the Game Works
+          How It Works
         </button>
       </AppHero>
       <ClusterUiTable />

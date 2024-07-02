@@ -99,8 +99,6 @@ export function ExplainerUiModal({
   show: boolean;
 }) {
   const markdown = `
-  # Over / Under
-
   ### 1. A random number 0-1000 is generated every Round.
   ### 2. Players bet on whether the outcome of current Round's Random Number will be:
   -- higher than (over) the previous Round's Random Number. --
@@ -112,12 +110,12 @@ export function ExplainerUiModal({
   ### 5. If the random number is the same as the previous number, the House wins the entire pot. 
   ### 6. This is the House's only win condition and there are no fees taken by the House in any other form.
 
-  [Link to GitHub](https://github.com/bgoober/over_under)
+  [**Link to GitHub**](https://github.com/bgoober/over_under)
   `;
 
   return (
     <AppModal
-      title="Explainer"
+      title="Over / Under"
       hide={hideModal}
       show={show}
     >

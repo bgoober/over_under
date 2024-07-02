@@ -23,3 +23,4 @@ solana-program = "1.16.13"
 anchor-instruction-sysvar = { git="https://github.com/deanmlittle/anchor-instruction-sysvar" }
 bytemuck = { version = "1.4.0", features = ["derive", "min_const_generics"]}
 anchor-spl = { version = "0.28.0" }
+switchboard-on-demand = "0.1.12"

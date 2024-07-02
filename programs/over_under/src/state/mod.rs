@@ -30,11 +30,12 @@ pub struct Round {
     pub vault_bump: u8, // the bump used to generate the vault PDA
     pub outcome: u8, // the outcome of the user's bet vs the number drawn. evaluated and updated in resolve round
     pub bets: Vec<Pubkey>, // the players that placed a bet in the round
-    pub players: Vec<Pubkey> // the players that placed a bet in the round
+    pub players: Vec<Pubkey>, // the players that placed a bet in the round
+    pub randomness_account: Pubkey
 }
 
 impl Round { 
-    pub const LEN: usize = 8+8+2+(4+(32*10))+(4+(32*10))+1+1+1;
+    pub const LEN: usize = 8+8+2+(4+(32*10))+(4+(32*10))+1+1+1+32;
 
     pub fn to_slice(&self) -> Vec<u8> {
         let mut s = self.round.to_le_bytes().to_vec();
@@ -50,6 +51,8 @@ impl Round {
         for bet in self.bets.iter() {
             s.extend_from_slice(&bet.to_bytes());
         }
+
+        s.extend_from_slice(&self.randomness_account.to_bytes());
         s        
     }
 }

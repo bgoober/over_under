@@ -43,13 +43,43 @@ pub mod over_under {
 
         // Play the round, which calculates the roll, updates the round number,
         // the outcome of the round, and updates global state
-        ctx.accounts.play_round(&ctx.bumps, &sig)?;
+        ctx.accounts
+            .play_round(&ctx.bumps, &sig, randomness_account)?;
         msg!("play_round Signature: {:?}", sig);
 
         Ok(())
     }
 
     pub fn assess_winners(ctx: Context<AssessWinnersC>) -> Result<()> {
+        let clock: Clock = Clock::get()?;
+        // call the switchboard on-demand parse function to get the randomness data
+        let randomness_data =
+            RandomnessAccountData::parse(ctx.accounts.randomness_account_data.data.borrow())
+                .unwrap();
+        // call the switchboard on-demand get_value function to get the revealed random value
+        let revealed_random_value = randomness_data
+            .get_value(&clock)
+            .map_err(|_| ErrorCode::RandomnessNotResolved)?;
+
+        // Use the revealed random value to determine the flip results
+        let randomness_result = revealed_random_value[0] % 1001 == 0;
+
+        // Update and log the result
+        ctx.accounts.round.number = randomness_result;
+
+        {
+            if ctx.accounts.round.number > ctx.accounts.global.number {
+                ctx.accounts.round.outcome = 1; // number was higher
+               ctx.accounts.global.number = randomness_result;
+            } else if ctx.accounts.round.number < ctx.accounts.global.number {
+                ctx.accounts.round.outcome = 0; // number was lower
+                ctx.accounts.global.number = randomness_result;
+            } else if ctx.accounts.round.number == ctx.accounts.global.number {
+                ctx.accounts.round.outcome = 2; // number was the same
+                ctx.accounts.global.number = randomness_result;
+            }
+        }
+
         let mut total_winners_pot = 0;
         let mut winner_accounts = Vec::new();
 

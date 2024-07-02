@@ -33,6 +33,9 @@ pub struct RoundC<'info> {
     #[account(seeds = [b"vault", round.key().as_ref()], bump)]
     pub vault: SystemAccount<'info>,
 
+    /// CHECK: The account's data is validated manually within the handler.
+    pub randomness_account_data: AccountInfo<'info>,
+
     pub system_program: Program<'info, System>,
 }
 
@@ -45,6 +48,7 @@ impl <'info> RoundC<'info> {
             outcome: 3,
             bets: Vec::with_capacity(10),
             players: Vec::with_capacity(10),
+            randomness_account: Pubkey::default(),
             bump: *bumps.get("round").unwrap(),
             vault_bump: *bumps.get("vault").unwrap(),
         });

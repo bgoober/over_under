@@ -1,5 +1,5 @@
 use std::collections::BTreeMap;
-
+use solana_program::program_pack::Pack;
 use anchor_instruction_sysvar::Ed25519InstructionSignatures;
 use anchor_lang::prelude::*;
 use solana_program::{
@@ -41,97 +41,114 @@ pub struct PlayRoundC<'info> {
     /// CHECK: This is safe
     pub instruction_sysvar: UncheckedAccount<'info>,
 
+    /// CHECK: The account's data is validated manually within the handler.
+    pub randomness_account_data: AccountInfo<'info>,
+
     pub system_program: Program<'info, System>,
 }
 
 impl<'info> PlayRoundC<'info> {
-    pub fn verify_ed25519_signature(&mut self, sig: &[u8]) -> Result<()> {
-        // Get the Ed25519 signature instruction
-        let ix = load_instruction_at_checked(0, &self.instruction_sysvar.to_account_info())?;
-        // Make sure the instruction is addressed to the ed25519 program
-        require_keys_eq!(ix.program_id, ed25519_program::ID, Error::Ed25519Program);
-        // Make sure there are no accounts present
-        require_eq!(ix.accounts.len(), 0, Error::Ed25519Accounts);
+    // pub fn verify_ed25519_signature(&mut self, sig: &[u8]) -> Result<()> {
+    //     // Get the Ed25519 signature instruction
+    //     let ix = load_instruction_at_checked(0, &self.instruction_sysvar.to_account_info())?;
+    //     // Make sure the instruction is addressed to the ed25519 program
+    //     require_keys_eq!(ix.program_id, ed25519_program::ID, Error::Ed25519Program);
+    //     // Make sure there are no accounts present
+    //     require_eq!(ix.accounts.len(), 0, Error::Ed25519Accounts);
 
-        let signatures = Ed25519InstructionSignatures::unpack(&ix.data)?.0;
+    //     let signatures = Ed25519InstructionSignatures::unpack(&ix.data)?.0;
 
-        require_eq!(signatures.len(), 1, Error::Ed25519DataLength);
-        let signature = &signatures[0];
+    //     require_eq!(signatures.len(), 1, Error::Ed25519DataLength);
+    //     let signature = &signatures[0];
 
-        // Make sure all the data is present to verify the signature
-        require!(signature.is_verifiable, Error::Ed25519Header);
+    //     // Make sure all the data is present to verify the signature
+    //     require!(signature.is_verifiable, Error::Ed25519Header);
 
-        // Ensure public keys match
-        require_keys_eq!(
-            signature.public_key.ok_or(Error::Ed25519Pubkey)?,
-            self.house.key(),
-            Error::Ed25519Pubkey
-        );
+    //     // Ensure public keys match
+    //     require_keys_eq!(
+    //         signature.public_key.ok_or(Error::Ed25519Pubkey)?,
+    //         self.house.key(),
+    //         Error::Ed25519Pubkey
+    //     );
 
-        // Ensure signatures match
-        require!(
-            &signature.signature.ok_or(Error::Ed25519Signature)?.eq(sig),
-            Error::Ed25519Signature
-        );
+    //     // Ensure signatures match
+    //     require!(
+    //         &signature.signature.ok_or(Error::Ed25519Signature)?.eq(sig),
+    //         Error::Ed25519Signature
+    //     );
 
-        //msg!("signature.message: {:#?}", signature.message.as_ref().unwrap());
+    //     //msg!("signature.message: {:#?}", signature.message.as_ref().unwrap());
 
-        // print self.round.to_slice()
-        //msg!("self.round.to_slice(): {:#?}", self.round.to_slice());
+    //     // print self.round.to_slice()
+    //     //msg!("self.round.to_slice(): {:#?}", self.round.to_slice());
 
-        // Ensure messages match
-        require!(
-            true,
-            // I CHANGED THIS TO TRUE BECAUSE THE SIGNATURE STARTED NOT MATCHING AND I JUST NEED A RANDOM NUMBER FOR CAPSTONE!!
-            // &signature
-            //     .message
-            //     .as_ref()
-            //     .ok_or(Error::Ed25519Signature)?
-            //     .starts_with(&self.round.to_slice()), // making comparison of the round slice to the message signature
-            Error::Ed25519Signature
-        );
+    //     // Ensure messages match
+    //     require!(
+    //         true,
+    //         // I CHANGED THIS TO TRUE BECAUSE THE SIGNATURE STARTED NOT MATCHING AND I JUST NEED A RANDOM NUMBER FOR CAPSTONE!!
+    //         // &signature
+    //         //     .message
+    //         //     .as_ref()
+    //         //     .ok_or(Error::Ed25519Signature)?
+    //         //     .starts_with(&self.round.to_slice()), // making comparison of the round slice to the message signature
+    //         Error::Ed25519Signature
+    //     );
 
-        Ok(())
-    }
+    //     Ok(())
+    // }
 
-    pub fn play_round(&mut self, _bumps: &BTreeMap<String, u8>, sig: &[u8]) -> Result<()> {
+    pub fn play_round(&mut self, _bumps: &BTreeMap<String, u8>, sig: &[u8], randomness_account: Pubkey) -> Result<()> {
         msg!(&format!("round.bets.len(): {:#?}", self.round.bets));
         if self.round.bets.len() == 0 {
             return Err(Error::NoBetsInRound.into());
         } else {
-            let hash = hash(sig).to_bytes();
-            let mut hash_16: [u8; 16] = [0; 16];
-            hash_16.copy_from_slice(&hash[0..16]);
-            let lower = u128::from_le_bytes(hash_16);
-            hash_16.copy_from_slice(&hash[16..32]);
-            let upper = u128::from_le_bytes(hash_16);
+            let clock = Clock::get()?;
+            let randomness_data =
+                RandomnessAccountData::parse(self.randomness_account_data.data.borrow()).unwrap();
 
-            // produce a number 0-100
-            let roll = lower.wrapping_add(upper).wrapping_rem(1001) as u16;
-
-            msg!("Roll: {:?}", roll);
-
-            self.round.number = roll;
-
-            {
-                if self.round.number > self.global.number {
-                    self.round.outcome = 1; // number was higher
-                    self.global.number = roll;
-                } else if self.round.number < self.global.number {
-                    self.round.outcome = 0; // number was lower
-                    self.global.number = roll;
-                } else if self.round.number == self.global.number {
-                    self.round.outcome = 2; // number was the same
-                    self.global.number = roll;
-                }
+            if randomness_data.seed_slot != clock.slot - 1 {
+                msg!("seed_slot: {}", randomness_data.seed_slot);
+                msg!("slot: {}", clock.slot);
+                return Err(ErrorCode::RandomnessAlreadyRevealed.into());
             }
-
-            msg!("Round Outcome: {:?}", self.round.outcome);
-            msg!("Round Number: {:?}", self.round.number);
-            msg!("Global Number: {:?}", self.global.number);
-            msg!("Global Round: {:?}", self.global.round);
-
-            Ok(())
         }
+
+        self.round.randomness_account = randomness_account;
+
+
+        // } else {
+        //     let hash = hash(sig).to_bytes();
+        //     let mut hash_16: [u8; 16] = [0; 16];
+        //     hash_16.copy_from_slice(&hash[0..16]);
+        //     let lower = u128::from_le_bytes(hash_16);
+        //     hash_16.copy_from_slice(&hash[16..32]);
+        //     let upper = u128::from_le_bytes(hash_16);
+
+        // produce a number 0-1000
+        // let roll = lower.wrapping_add(upper).wrapping_rem(1001) as u16;
+
+        // msg!("Roll: {:?}", roll);
+
+        // self.round.number = roll;
+
+        // {
+        //     if self.round.number > self.global.number {
+        //         self.round.outcome = 1; // number was higher
+        //         self.global.number = roll;
+        //     } else if self.round.number < self.global.number {
+        //         self.round.outcome = 0; // number was lower
+        //         self.global.number = roll;
+        //     } else if self.round.number == self.global.number {
+        //         self.round.outcome = 2; // number was the same
+        //         self.global.number = roll;
+        //     }
+        // }
+
+        // msg!("Round Outcome: {:?}", self.round.outcome);
+        // msg!("Round Number: {:?}", self.round.number);
+        // msg!("Global Number: {:?}", self.global.number);
+        // msg!("Global Round: {:?}", self.global.round);
+
+        Ok(())
     }
 }

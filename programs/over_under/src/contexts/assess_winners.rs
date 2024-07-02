@@ -27,6 +27,9 @@ pub struct AssessWinnersC<'info> {
     #[account(seeds = [b"vault", round.key().as_ref()], bump = round.vault_bump)]
     pub vault: SystemAccount<'info>,
 
+    /// CHECK: The account's data is validated manually within the handler.
+    pub randomness_account_data: AccountInfo<'info>,
+
     // system program
     pub system_program: Program<'info, System>,
 }

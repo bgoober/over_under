@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { AppHero } from '../ui/ui-layout';
-import { ClusterUiModal, ExplainerUiModal } from './cluster-ui';
+import { ExplainerUiModal } from './cluster-ui';
 import { ClusterUiTable } from './cluster-ui';
 
 export default function ClusterFeature() {

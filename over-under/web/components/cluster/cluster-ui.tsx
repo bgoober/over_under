@@ -121,7 +121,13 @@ export function ExplainerUiModal({
       hide={hideModal}
       show={show}
     >
-      <ReactMarkdown>{markdown}</ReactMarkdown>
+      <ReactMarkdown
+        components={{
+          a: ({node, ...props}) => <a {...props} target="_blank" rel="noopener noreferrer" />
+        }}
+      >
+        {markdown}
+      </ReactMarkdown>
     </AppModal>
   );
 }

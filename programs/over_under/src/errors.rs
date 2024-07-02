@@ -37,5 +37,7 @@ pub enum Error {
     #[msg("No Bets In Round")]
     NoBetsInRound,
     #[msg("Round Mismatch")]
-    RoundMismatch
+    RoundMismatch,
+    #[msg("10 Player Maximum Reached. Try again next round!")]
+    Max10PlayersReached
 }

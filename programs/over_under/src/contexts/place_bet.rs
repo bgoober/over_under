@@ -56,6 +56,8 @@ impl<'info> BetC<'info> {
     ) -> Result<()> {
         if self.round.outcome != 3 || self.round.number != 101 {
             return Err(Error::RoundAlreadyPlayed.into());
+        } else if self.round.bets.len() == 10 || self.round.players.len() == 10 {
+            return Err(Error::Max10PlayersReached.into());
         } else {
             self.bet.set_inner(Bet {
                 player: self.player.key(),

@@ -12,7 +12,7 @@ use crate::state::Global;
 #[instruction(_round: u64)]
 pub struct RoundC<'info> {
     // signer
-    #[account(mut, constraint = thread.key() == global.auth)]
+    #[account(mut)]
     pub thread: Signer<'info>,
 
     #[account()]

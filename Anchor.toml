@@ -15,4 +15,11 @@ cluster = "Localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/single_player.ts"
+global = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/init_global.ts"
+round = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/init_round.ts"
+bet = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/place_bet.ts"
+play = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/play_round.ts"
+assess = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/assess_winners.ts"
+payout = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/payout.ts"
+close = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/close_round.ts"

@@ -5,7 +5,7 @@ use crate::state::{Global, Round};
 #[derive(Accounts)]
 pub struct AssessWinnersC<'info> {
     // signer
-    #[account(mut, address = global.auth)]
+    #[account(mut)]
     pub thread: Signer<'info>,
 
     // house

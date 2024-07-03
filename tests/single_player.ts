@@ -366,7 +366,7 @@ describe("over_under", () => {
   });
 
   // close a bet, anyone can sign, only the bet.player can be paid out though
-  it("Bet Closed!", async () => {
+  it("1 Bet Closed!", async () => {
     try {
       // Hardcoded values
       const hardcodedRoundNumber = 1; // Example hardcoded round number
@@ -399,8 +399,7 @@ describe("over_under", () => {
       console.log("player: ", player.toString());
 
       // Close the bet using the hardcoded values
-      const tx = await program.methods
-        .closeBet()
+      const tx = await program.methods.closeBets1()
         .accounts({
           player: hardcodedPlayerPubkey, // Use the hardcoded player public key
           bet,

@@ -9,6 +9,7 @@ use anchor_lang::prelude::*;
 mod contexts;
 use contexts::*;
 mod errors;
+use errors::Error;
 mod state;
 use state::*;
 
@@ -50,38 +51,42 @@ pub mod over_under {
     }
 
     pub fn assess_winners(ctx: Context<AssessWinnersC>) -> Result<()> {
-        let mut total_winners_pot = 0;
-        let mut winner_accounts = Vec::new();
+        if ctx.accounts.round.outcome == 3 || ctx.accounts.round.number == 101 {
+            return Err(Error::RoundNotYetPlayed.into());
+        } else {
+            let mut total_winners_pot = 0;
+            let mut winner_accounts = Vec::new();
 
-        let vault = ctx.accounts.vault.lamports();
+            let vault = ctx.accounts.vault.lamports();
 
-        for account in ctx.remaining_accounts.iter() {
-            let _account_key = account.key();
-            let data = account.try_borrow_mut_data()?;
+            for account in ctx.remaining_accounts.iter() {
+                let _account_key = account.key();
+                let data = account.try_borrow_mut_data()?;
 
-            //Deserialize the data from the account and save it in an Account variable
-            let account_to_write =
-                Bet::try_deserialize(&mut data.as_ref()).expect("Error Deserializing Data");
+                //Deserialize the data from the account and save it in an Account variable
+                let account_to_write =
+                    Bet::try_deserialize(&mut data.as_ref()).expect("Error Deserializing Data");
 
-            if account_to_write.bet == ctx.accounts.round.outcome {
-                total_winners_pot += account_to_write.amount;
-                winner_accounts.push((account.key(), account_to_write));
+                if account_to_write.bet == ctx.accounts.round.outcome {
+                    total_winners_pot += account_to_write.amount;
+                    winner_accounts.push((account.key(), account_to_write));
+                }
             }
-        }
 
-        // Apply collected changes outside the previous loop
-        for (account, account_to_write) in winner_accounts.iter_mut() {
-            let payout = (account_to_write.amount as u64 / total_winners_pot) * vault; // Ensure correct division
-            account_to_write.payout = payout;
+            // Apply collected changes outside the previous loop
+            for (account, account_to_write) in winner_accounts.iter_mut() {
+                let payout = (account_to_write.amount as u64 / total_winners_pot) * vault; // Ensure correct division
+                account_to_write.payout = payout;
 
-            // Find the account by account_key to serialize data back
-            if let Some(account) = ctx
-                .remaining_accounts
-                .iter()
-                .find(|a| a.key() == account.key())
-            {
-                let mut data = account.try_borrow_mut_data()?;
-                let _ = account_to_write.try_serialize(&mut data.as_mut());
+                // Find the account by account_key to serialize data back
+                if let Some(account) = ctx
+                    .remaining_accounts
+                    .iter()
+                    .find(|a| a.key() == account.key())
+                {
+                    let mut data = account.try_borrow_mut_data()?;
+                    let _ = account_to_write.try_serialize(&mut data.as_mut());
+                }
             }
         }
         Ok(())
@@ -97,7 +102,52 @@ pub mod over_under {
         Ok(())
     }
 
-    pub fn close_bet(ctx: Context<CloseBetC>) -> Result<()> {
+    pub fn close_bets1(ctx: Context<Close1BetC>) -> Result<()> {
+        let _ctx = ctx;
+        Ok(())
+    }
+
+    pub fn close_bets2(ctx: Context<Close2BetsC>) -> Result<()> {
+        let _ctx = ctx;
+        Ok(())
+    }
+
+    pub fn close_bets3(ctx: Context<Close3BetsC>) -> Result<()> {
+        let _ctx = ctx;
+        Ok(())
+    }
+
+    pub fn close_bets4(ctx: Context<Close4BetsC>) -> Result<()> {
+        let _ctx = ctx;
+        Ok(())
+    }
+
+    pub fn close_bets5(ctx: Context<Close5BetsC>) -> Result<()> {
+        let _ctx = ctx;
+        Ok(())
+    }
+
+    pub fn close_bets6(ctx: Context<Close6BetsC>) -> Result<()> {
+        let _ctx = ctx;
+        Ok(())
+    }
+
+    pub fn close_bets7(ctx: Context<Close7BetsC>) -> Result<()> {
+        let _ctx = ctx;
+        Ok(())
+    }
+
+    pub fn close_bets8(ctx: Context<Close8BetsC>) -> Result<()> {
+        let _ctx = ctx;
+        Ok(())
+    }
+
+    pub fn close_bets9(ctx: Context<Close9BetsC>) -> Result<()> {
+        let _ctx = ctx;
+        Ok(())
+    }
+
+    pub fn close_bets10(ctx: Context<Close10BetsC>) -> Result<()> {
         let _ctx = ctx;
         Ok(())
     }

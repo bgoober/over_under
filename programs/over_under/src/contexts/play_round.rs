@@ -98,6 +98,8 @@ impl<'info> PlayRoundC<'info> {
         msg!(&format!("round.bets.len(): {:#?}", self.round.bets));
         if self.round.bets.len() == 0 {
             return Err(Error::NoBetsInRound.into());
+        } else if self.round.outcome != 3 || self.round.number != 101 {
+            return Err(Error::RoundAlreadyPlayed.into());
         } else {
             let hash = hash(sig).to_bytes();
             let mut hash_16: [u8; 16] = [0; 16];
@@ -107,7 +109,7 @@ impl<'info> PlayRoundC<'info> {
             let upper = u128::from_le_bytes(hash_16);
 
             // produce a number 0-100
-            let roll = lower.wrapping_add(upper).wrapping_rem(1001) as u16;
+            let roll = lower.wrapping_add(upper).wrapping_rem(101) as u8;
 
             msg!("Roll: {:?}", roll);
 

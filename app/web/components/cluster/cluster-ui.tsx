@@ -107,8 +107,7 @@ export function ExplainerUiModal({
   -- lower than (under) the previous Round's Random Number. --
   ### 3. Losers pay Winners.
   ### 4. player_winnings = (player_bet / winning_bets_sum) * total_pot
-  ### 5. If the random number is the same as the previous number, the House wins the entire pot. 
-  ### 6. This is the House's only win condition and there are no fees taken by the House in any other form.
+  ### 5. If the random number is the same as the previous number, or if everyone loses, the House wins the entire pot. 
 
   [**Link to GitHub**](https://github.com/bgoober/over_under)
   `;

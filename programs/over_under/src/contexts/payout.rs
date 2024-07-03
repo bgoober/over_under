@@ -8,7 +8,7 @@ use crate::state::{Bet, Global, Round};
 #[derive(Accounts)]
 pub struct PayC<'info> {
     // signer
-    #[account(mut, constraint = thread.key() == global.auth.key())]
+    #[account(mut, constraint = thread.key() == global.house.key())]
     pub thread: Signer<'info>,
 
     #[account()]

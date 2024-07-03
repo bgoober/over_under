@@ -34,6 +34,8 @@ pub enum Error {
     RoundAlreadyPlayed,
     #[msg("Round Still Ongoing")]
     RoundStillOngoing,
+    #[msg("Round Not Yet Played!")]
+    RoundNotYetPlayed,
     #[msg("No Bets In Round")]
     NoBetsInRound,
     #[msg("Round Mismatch")]

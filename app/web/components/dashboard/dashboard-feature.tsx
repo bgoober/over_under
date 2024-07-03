@@ -23,11 +23,15 @@ export default function DashboardFeature() {
 
   const handleBetOver = () => {
     console.log(`Betting over with ${solAmountOver} SOL`);
+    sendInstruction(inputValue); // Replace with your actual function call
+
     // Implement the betting logic here
   };
 
   const handleBetUnder = () => {
     console.log(`Betting under with ${solAmountUnder} SOL`);
+    sendInstruction(inputValue); // Replace with your actual function call
+
     // Implement the betting logic here
   };
 
@@ -35,7 +39,7 @@ export default function DashboardFeature() {
     <div>
       <AppHero
         title="Over / Under"
-        subtitle="Bet on whether the current round's random number, 0 - 1000, will be higher or lower than the previous round's random number, 0 - 1000."
+        subtitle="Bet on whether the current round's random number will be higher or lower than the previous round's random number, 0 - 100."
       >
         {/* Explainer Modal Section */}
         <div
@@ -58,13 +62,14 @@ export default function DashboardFeature() {
         <div className="text-center" style={{ marginBottom: '2rem' }}>
           <div style={{ fontSize: '1rem', marginBottom: '1rem' }}>
             <p>Current Round: {5}</p>
+            <p>Number of Players: {0}/10</p>
           </div>
           <div style={{ fontSize: '1.50rem' }}>
             <p style={{ textAlign: 'center' }}>
               Previous Random Number:
               <br />
               <span style={{ display: 'block', fontSize: '2.5rem' }}>
-                {217}
+                {42}
               </span>
             </p>
           </div>

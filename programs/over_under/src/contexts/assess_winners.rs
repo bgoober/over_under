@@ -9,7 +9,7 @@ pub struct AssessWinnersC<'info> {
     pub thread: Signer<'info>,
 
     // house
-    #[account(mut)]
+    #[account(address = global.house)]
     pub house: SystemAccount<'info>,
 
     // global account

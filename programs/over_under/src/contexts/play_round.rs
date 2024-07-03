@@ -17,7 +17,7 @@ pub struct PlayRoundC<'info> {
     thread: Signer<'info>,
 
     // the pubkey of the signer of init global
-    #[account()]
+    #[account(address = global.house)]
     pub house: SystemAccount<'info>,
 
     // global account which is a pda of the program ID and the house pubkey
@@ -32,7 +32,7 @@ pub struct PlayRoundC<'info> {
     pub round: Box<Account<'info, Round>>,
 
     // vault pda of the round account
-    #[account(mut, seeds = [b"vault", round.key().as_ref()], bump = round.vault_bump)]
+    #[account(seeds = [b"vault", round.key().as_ref()], bump = round.vault_bump)]
     pub vault: SystemAccount<'info>,
 
     #[account(

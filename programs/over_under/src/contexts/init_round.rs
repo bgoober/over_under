@@ -15,7 +15,7 @@ pub struct RoundC<'info> {
     #[account(mut)]
     pub thread: Signer<'info>,
 
-    #[account()]
+    #[account(address = global.house)]
     pub house: SystemAccount<'info>,
 
     // global account which is a pda of the program ID and the house pubkey

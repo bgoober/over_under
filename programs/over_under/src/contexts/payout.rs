@@ -3,15 +3,15 @@ use anchor_lang::{
     system_program::{transfer, Transfer},
 };
 
-use crate::state::{Bet, Global, Round};
+use crate::{state::{Bet, Global, Round}, errors::Error};
 
 #[derive(Accounts)]
 pub struct PayC<'info> {
     // signer
-    #[account(mut, constraint = thread.key() == global.house.key())]
+    #[account(mut)]
     pub thread: Signer<'info>,
 
-    #[account()]
+    #[account(mut, address = global.house)]
     pub house: SystemAccount<'info>,
 
     /// CHECK this is safe
@@ -98,6 +98,8 @@ impl<'info> PayC<'info> {
 
             let amount = self.vault.lamports();
             transfer(cpi_ctx, amount)?;
+        } else if self.round.outcome == 3 || self.round.number == 101 {
+            return Err(Error::RoundNotYetPlayed.into());
         } else {
             let player_bets = vec![
                 (self.player1.as_ref(), self.bet1.as_ref()),

@@ -3,11 +3,19 @@
 import { SetStateAction, useState } from 'react';
 import { AppHero } from '../ui/ui-layout';
 import { ExplainerUiModal } from '../cluster/cluster-ui';
+import { useProgram } from "../../utils/useProgram";
+import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
+import {BN, web3} from "@coral-xyz/anchor";
+import { PublicKey } from '@solana/web3.js';
 
 export default function DashboardFeature() {
   const [solAmountOver, setSolAmountOver] = useState('');
   const [solAmountUnder, setSolAmountUnder] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const { connection } = useConnection();
+  const wallet = useAnchorWallet();
+
+  const { program } = useProgram({ connection, wallet });
 
   const handleSolAmountChangeOver = (event: {
     target: { value: SetStateAction<string> };
@@ -28,10 +36,64 @@ export default function DashboardFeature() {
     // Implement the betting logic here
   };
 
-  const handleBetUnder = () => {
+  const handleBetUnder = async () => {
     console.log(`Betting under with ${solAmountUnder} SOL`);
-    sendInstruction(inputValue); // Replace with your actual function call
+  //  sendInstruction(inputValue); // Replace with your actual function call
+  if (!program|| !wallet) return;
+  // amount: u64, bet: u8, round: u64
+  const amount = new BN(solAmountUnder);
+  const roundnumber = new BN(solAmountUnder);
+  const betnumber = 1;
 
+  const [global] = web3.PublicKey.findProgramAddressSync(
+    [Buffer.from("global"), wallet.publicKey.toBuffer()],
+    program.programId
+  );
+  console.log(`global: `, global.toBase58());
+  const globalAccount = await program.account.global.fetch(new PublicKey("4NSN6vFkimNYFcDdcL5Yrjjd1Di1wqga4N2ygjzYFsFt"));
+  console.log("ok");
+  const _roundBN = new BN(globalAccount.round.toString());
+
+    // Convert to 8-byte Buffer in little-endian for other operations
+    const _roundBuffer = _roundBN.toArrayLike(Buffer, "le", 8);
+    const [round] = web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("round"), global.toBuffer(), _roundBuffer],
+      program.programId
+    );
+    console.log("Ok2");
+
+    const [vault] = web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("vault"), round.toBuffer()],
+      program.programId
+    );
+    console.log("if you don't see this, it's not working");
+
+    const roundAccount = await program.account.round.fetch(round);
+    console.log(`round: `, roundAccount.round.toString());
+
+    console.log(`global round: `, globalAccount.round.toString());
+
+    let round_number = roundAccount.round.toNumber();
+    console.log(`round number: `, round_number);
+
+    // This should be the player's public key or similar identifier
+    const [bet] = web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("bet"), round.toBuffer(), wallet.publicKey.toBuffer()],
+      program.programId
+    );
+
+  const tx = await program.methods.placeBet(amount, betnumber, roundnumber)
+  .accounts({
+    player: wallet?.publicKey,
+    house: global,
+    global,
+    round,
+    vault,
+    bet
+  })
+  .rpc({
+    skipPreflight:true
+  })  ;
     // Implement the betting logic here
   };
 

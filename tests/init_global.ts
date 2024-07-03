@@ -14,7 +14,7 @@ import {
 import BN from "bn.js";
 
 // use my local keypair for signing
-import wallet from "/home/agent/.config/solana/id.json";
+import wallet from "../wallet.json";
 
 // Get the keypair from the wallet
 const keypair = Keypair.fromSecretKey(new Uint8Array(wallet));
@@ -41,7 +41,7 @@ describe("over_under", () => {
       [Buffer.from("global"), keypair.publicKey.toBuffer()],
       program.programId
     );
-  
+    console.log(`global: `, global.toBase58());
     it("Global initialized!", async () => {
       // Add your test here.
       try {

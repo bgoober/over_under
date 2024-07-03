@@ -14,7 +14,7 @@ import {
 import BN from "bn.js";
 
 // use my local keypair for signing
-import wallet from "/home/agent/.config/solana/id.json";
+import wallet from "../wallet.json";
 import { publicKey } from "@coral-xyz/anchor/dist/cjs/utils";
 
 // Get the keypair from the wallet

@@ -13,7 +13,7 @@ use errors::Error;
 mod state;
 use state::*;
 
-declare_id!("3qzsebktNn3EJCxjoCmmbHnu62x3ebGpKuyv5qBxLp8V");
+declare_id!("6qUeZY7njik5mb5Q3MCGkdyt8NSvyLtAxsDnErhVm6dV");
 
 #[program]
 pub mod over_under {

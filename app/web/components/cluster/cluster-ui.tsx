@@ -99,7 +99,7 @@ export function ExplainerUiModal({
   show: boolean;
 }) {
   const markdown = `
-  ### 1. A random number 0-1000 is generated every Round.
+  ### 1. A random number 0-100 is generated every Round.
   ### 2. Players bet on whether the outcome of current Round's Random Number will be:
   -- higher than (over) the previous Round's Random Number. --
 

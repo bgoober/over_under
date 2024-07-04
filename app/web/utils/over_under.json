@@ -1,0 +1,1256 @@
+{
+  "version": "0.1.0",
+  "name": "over_under",
+  "instructions": [
+    {
+      "name": "initGlobal",
+      "accounts": [
+        {
+          "name": "house",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "global",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initRound",
+      "accounts": [
+        {
+          "name": "thread",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "house",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "global",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "round",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vault",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "round",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "placeBet",
+      "accounts": [
+        {
+          "name": "player",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "house",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "global",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "round",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "bet",
+          "type": "u8"
+        },
+        {
+          "name": "round",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "playRound",
+      "accounts": [
+        {
+          "name": "thread",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "house",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "global",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "round",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vault",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "instructionSysvar",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "sig",
+          "type": "bytes"
+        }
+      ]
+    },
+    {
+      "name": "assessWinners",
+      "accounts": [
+        {
+          "name": "thread",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "house",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "global",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "round",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vault",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "payout",
+      "accounts": [
+        {
+          "name": "thread",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "house",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player1",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "CHECK this is safe"
+          ]
+        },
+        {
+          "name": "player2",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "player3",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "player4",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "player5",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "player6",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "player7",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "player8",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "player9",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "player10",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "global",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "round",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet1",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "bet2",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "bet3",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "bet4",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "bet5",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "bet6",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "bet7",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "bet8",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "bet9",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "bet10",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "closeRound",
+      "accounts": [
+        {
+          "name": "thread",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "house",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "global",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "round",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "closeBets1",
+      "accounts": [
+        {
+          "name": "thread",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "player",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "closeBets2",
+      "accounts": [
+        {
+          "name": "thread",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "player1",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet1",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player2",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet2",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "closeBets3",
+      "accounts": [
+        {
+          "name": "thread",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "player1",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet1",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player2",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet2",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player3",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet3",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "closeBets4",
+      "accounts": [
+        {
+          "name": "thread",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "player1",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet1",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player2",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet2",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player3",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet3",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player4",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet4",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "closeBets5",
+      "accounts": [
+        {
+          "name": "thread",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "player1",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet1",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player2",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet2",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player3",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet3",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player4",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet4",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player5",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet5",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "closeBets6",
+      "accounts": [
+        {
+          "name": "thread",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "player1",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet1",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player2",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet2",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player3",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet3",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player4",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet4",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player5",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet5",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player6",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet6",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "closeBets7",
+      "accounts": [
+        {
+          "name": "thread",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "player1",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet1",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player2",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet2",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player3",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet3",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player4",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet4",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player5",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet5",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player6",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet6",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player7",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet7",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "closeBets8",
+      "accounts": [
+        {
+          "name": "thread",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "player1",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet1",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player2",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet2",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player3",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet3",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player4",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet4",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player5",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet5",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player6",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet6",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player7",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet7",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player8",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet8",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "closeBets9",
+      "accounts": [
+        {
+          "name": "thread",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "player1",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet1",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player2",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet2",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player3",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet3",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player4",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet4",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player5",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet5",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player6",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet6",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player7",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet7",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player8",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet8",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player9",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet9",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "closeBets10",
+      "accounts": [
+        {
+          "name": "thread",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "player1",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet1",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player2",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet2",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player3",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet3",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player4",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet4",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player5",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet5",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player6",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet6",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player7",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet7",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player8",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet8",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player9",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet9",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player10",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bet10",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Global",
+      "docs": [
+        "There are 3 Accounts possible: Global, representing the global state of the game.",
+        "/// Round, representing a round of the game.",
+        "Bet, representing a bet placed by a player.",
+        "",
+        "The Global account stores the current round number, the previous round number, and the previous round's randomly generated number, and the bump used to generate the global PDA.",
+        "The Round account stores its round number, the randomly generated number of the round, the players that placed a bet in the round, and the bump used to generate the round PDA.",
+        "A bet account stores the player's bet, the amount the player bet in SOL, the round the bet was placed in, and the bump used to generate the bet PDA."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "house",
+            "type": "publicKey"
+          },
+          {
+            "name": "round",
+            "type": "u64"
+          },
+          {
+            "name": "number",
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Round",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "round",
+            "type": "u64"
+          },
+          {
+            "name": "number",
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "vaultBump",
+            "type": "u8"
+          },
+          {
+            "name": "outcome",
+            "type": "u8"
+          },
+          {
+            "name": "bets",
+            "type": {
+              "vec": "publicKey"
+            }
+          },
+          {
+            "name": "players",
+            "type": {
+              "vec": "publicKey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Bet",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "player",
+            "type": "publicKey"
+          },
+          {
+            "name": "bet",
+            "type": "u8"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "round",
+            "type": "u64"
+          },
+          {
+            "name": "payout",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "BumpError",
+      "msg": "Bump error"
+    },
+    {
+      "code": 6001,
+      "name": "Overflow",
+      "msg": "Overflow"
+    },
+    {
+      "code": 6002,
+      "name": "MinimumBet",
+      "msg": "Minimum bet is 0.01 Sol"
+    },
+    {
+      "code": 6003,
+      "name": "MaximumBet",
+      "msg": "Maximum bet exceeded"
+    },
+    {
+      "code": 6004,
+      "name": "TimeoutNotReached",
+      "msg": "Timeout not yet reached"
+    },
+    {
+      "code": 6005,
+      "name": "Ed25519Header",
+      "msg": "Ed25519 Header Error"
+    },
+    {
+      "code": 6006,
+      "name": "Ed25519Pubkey",
+      "msg": "Ed25519 Pubkey Error"
+    },
+    {
+      "code": 6007,
+      "name": "Ed25519Message",
+      "msg": "Ed25519 Message Error"
+    },
+    {
+      "code": 6008,
+      "name": "Ed25519Signature",
+      "msg": "Ed25519 Signature Error"
+    },
+    {
+      "code": 6009,
+      "name": "Ed25519Program",
+      "msg": "Ed25119 Program Error"
+    },
+    {
+      "code": 6010,
+      "name": "Ed25519Accounts",
+      "msg": "Ed25119 Accounts Error"
+    },
+    {
+      "code": 6011,
+      "name": "Ed25519DataLength",
+      "msg": "Ed25119 Data Length Error"
+    },
+    {
+      "code": 6012,
+      "name": "RoundAlreadyPlayed",
+      "msg": "Round Already Played"
+    },
+    {
+      "code": 6013,
+      "name": "RoundStillOngoing",
+      "msg": "Round Still Ongoing"
+    },
+    {
+      "code": 6014,
+      "name": "RoundNotYetPlayed",
+      "msg": "Round Not Yet Played!"
+    },
+    {
+      "code": 6015,
+      "name": "NoBetsInRound",
+      "msg": "No Bets In Round"
+    },
+    {
+      "code": 6016,
+      "name": "RoundMismatch",
+      "msg": "Round Mismatch"
+    },
+    {
+      "code": 6017,
+      "name": "Max10PlayersReached",
+      "msg": "10 Player Maximum Reached. Try again next round!"
+    }
+  ],
+  "metadata": {
+    "address": "6qUeZY7njik5mb5Q3MCGkdyt8NSvyLtAxsDnErhVm6dV"
+  }
+}

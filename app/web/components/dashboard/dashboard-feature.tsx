@@ -11,9 +11,12 @@ import { OverUnder } from '../../utils/over_under';
 
 // use my local keypair for signing
 import wallet from '/home/agent/.config/solana/id.json';
+// import wallet2 from '../../../../wallet.json';
+
 
 // Get the keypair from the wallet
-const keypair = Keypair.fromSecretKey(new Uint8Array(wallet));
+const house = Keypair.fromSecretKey(new Uint8Array(wallet));
+// const player1 = Keypair.fromSecretKey(new Uint8Array(wallet2));
 
 export default function DashboardFeature() {
   const [solAmountOver, setSolAmountOver] = useState('');
@@ -54,7 +57,7 @@ export default function DashboardFeature() {
     const betnumber = 1;
 
     const [global] = web3.PublicKey.findProgramAddressSync(
-      [Buffer.from('global'), keypair.publicKey.toBuffer()],
+      [Buffer.from('global'), house.publicKey.toBuffer()],
       program.programId
     );
     const globalAccount = await program.account.global.fetch(global);
@@ -87,7 +90,7 @@ export default function DashboardFeature() {
       .placeBet(amount, betnumber, round_number)
       .accounts({
         player: wallet?.publicKey,
-        house: keypair.publicKey,
+        house: house.publicKey,
         global,
         round,
         vault,
@@ -111,7 +114,7 @@ export default function DashboardFeature() {
     const betnumber = 0;
 
     const [global] = web3.PublicKey.findProgramAddressSync(
-      [Buffer.from('global'), keypair.publicKey.toBuffer()],
+      [Buffer.from('global'), house.publicKey.toBuffer()],
       program.programId
     );
     console.log(`global: `, global.toBase58());
@@ -147,7 +150,7 @@ export default function DashboardFeature() {
       .placeBet(amount, betnumber, round_number)
       .accounts({
         player: wallet?.publicKey,
-        house: keypair.publicKey,
+        house: house.publicKey,
         global,
         round,
         vault,

@@ -70,12 +70,12 @@ describe("over_under", () => {
           program.programId
         );
         // fetch the bet
-        const betAccount = await program.account.bet.fetch(bet);
-        console.log("bet player: ", betAccount.player.toString());
-        console.log("bet bet: ", betAccount.bet.toString());
-        console.log(`bet amount: `, betAccount.amount.toString());
-        console.log("bet made in round: ", betAccount.round.toString());
-        console.log("bet payout: ", betAccount.payout.toString());
+        // const betAccount = await program.account.bet.fetch(bet);
+        // console.log("bet player: ", betAccount.player.toString());
+        // console.log("bet bet: ", betAccount.bet.toString());
+        // console.log(`bet amount: `, betAccount.amount.toString());
+        // console.log("bet made in round: ", betAccount.round.toString());
+        // console.log("bet payout: ", betAccount.payout.toString());
     
         /// DOCS: The ACCOUNTS object is constructed from required accounts + dynamically derived bet accounts for each round
         // Initialize the ACCOUNTS object with required accounts

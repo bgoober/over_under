@@ -80,22 +80,22 @@ impl<'info> PlayRoundC<'info> {
         //msg!("self.round.to_slice(): {:#?}", self.round.to_slice());
 
         // Ensure messages match
-        require!(
-            true,
-            // I CHANGED THIS TO TRUE BECAUSE THE SIGNATURE STARTED NOT MATCHING AND I JUST NEED A RANDOM NUMBER FOR CAPSTONE!!
-            // &signature
-            //     .message
-            //     .as_ref()
-            //     .ok_or(Error::Ed25519Signature)?
-            //     .starts_with(&self.round.to_slice()), // making comparison of the round slice to the message signature
-            Error::Ed25519Signature
-        );
+        // require!(
+        //     true,
+        //     // I CHANGED THIS TO TRUE BECAUSE THE SIGNATURE STARTED NOT MATCHING AND I JUST NEED A RANDOM NUMBER FOR CAPSTONE!!
+        //     // &signature
+        //     //     .message
+        //     //     .as_ref()
+        //     //     .ok_or(Error::Ed25519Signature)?
+        //     //     .starts_with(&self.round.to_slice()), // making comparison of the round slice to the message signature
+        //     Error::Ed25519Signature
+        // );
 
         Ok(())
     }
 
     pub fn play_round(&mut self, _bumps: &BTreeMap<String, u8>, sig: &[u8]) -> Result<()> {
-        msg!(&format!("round.bets.len(): {:#?}", self.round.bets));
+        // msg!(&format!("round.bets.len(): {:#?}", self.round.bets));
         if self.round.bets.len() == 0 {
             return Err(Error::NoBetsInRound.into());
         } else if self.round.outcome != 3 || self.round.number != 101 {
@@ -130,9 +130,8 @@ impl<'info> PlayRoundC<'info> {
 
             msg!("Round Outcome: {:?}", self.round.outcome);
             msg!("Round Number: {:?}", self.round.number);
-            msg!("Global Number: {:?}", self.global.number);
-            msg!("Global Round: {:?}", self.global.round);
 
+            msg!("Round Final Pot: {:?}", self.vault.lamports());
             Ok(())
         }
     }

@@ -37,15 +37,14 @@ pub mod over_under {
     }
 
     pub fn play_round(ctx: Context<PlayRoundC>, sig: Vec<u8>) -> Result<()> {
-        msg!("test play round instruction");
         // Verify the provided signature
         ctx.accounts.verify_ed25519_signature(&sig)?;
-        msg!("Signature: {:?}", sig);
+        // msg!("Signature: {:?}", sig);
 
         // Play the round, which calculates the roll, updates the round number,
         // the outcome of the round, and updates global state
         ctx.accounts.play_round(&ctx.bumps, &sig)?;
-        msg!("play_round Signature: {:?}", sig);
+        // msg!("play_round Signature: {:?}", sig);
 
         Ok(())
     }
@@ -71,6 +70,13 @@ pub mod over_under {
                     total_winners_pot += account_to_write.amount;
                     winner_accounts.push((account.key(), account_to_write));
                 }
+            }
+
+            msg!("Number of winners in round: {}", winner_accounts.len());
+
+            // Log the pubkeys for each winner
+            for (account_key, _) in winner_accounts.iter() {
+                msg!("Winning Bet pubkey: {}", account_key);
             }
 
             // Apply collected changes outside the previous loop

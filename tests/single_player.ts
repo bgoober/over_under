@@ -207,6 +207,10 @@ describe("over_under", () => {
     await sendAndConfirmTransaction(program.provider.connection, tx, [keypair])
       .then(log)
       .catch((error) => console.error("Transaction # Error:", error));
+
+
+    const roundAccount2 = await program.account.round.fetch(round);
+    console.log("New Random Number: ", roundAccount2.number.toString());
   });
 
   it("Winners Assessed!", async () => {

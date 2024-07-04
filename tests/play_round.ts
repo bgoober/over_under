@@ -20,28 +20,28 @@ import wallet from "/home/agent/.config/solana/id.json";
 const keypair = Keypair.fromSecretKey(new Uint8Array(wallet));
 
 describe("over_under", () => {
-    // Configure the client to use the local cluster.
-    const provider = anchor.AnchorProvider.env();
-    anchor.setProvider(provider);
-    const connection = provider.connection;
-    const program = anchor.workspace.OverUnder as Program<OverUnder>;
-  
-    const confirm = async (signature: string): Promise<string> => {
-      const block = await connection.getLatestBlockhash();
-      await connection.confirmTransaction({ signature, ...block });
-      return signature;
-    };
-  
-    const log = async (signature: string): Promise<string> => {
-      console.log(signature);
-      return signature;
-    };
-  
-    const [global] = web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("global"), keypair.publicKey.toBuffer()],
-      program.programId
-    );
-  
+  // Configure the client to use the local cluster.
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
+  const connection = provider.connection;
+  const program = anchor.workspace.OverUnder as Program<OverUnder>;
+
+  const confirm = async (signature: string): Promise<string> => {
+    const block = await connection.getLatestBlockhash();
+    await connection.confirmTransaction({ signature, ...block });
+    return signature;
+  };
+
+  const log = async (signature: string): Promise<string> => {
+    console.log(signature);
+    return signature;
+  };
+
+  const [global] = web3.PublicKey.findProgramAddressSync(
+    [Buffer.from("global"), keypair.publicKey.toBuffer()],
+    program.programId
+  );
+
   // play_round
   it("Round played!", async () => {
     // Fetch the global account
@@ -91,5 +91,8 @@ describe("over_under", () => {
     await sendAndConfirmTransaction(program.provider.connection, tx, [keypair])
       .then(log)
       .catch((error) => console.error("Transaction # Error:", error));
+
+    const roundAccount2 = await program.account.round.fetch(round);
+    console.log("New Random Number: ", roundAccount2.number.toString());
   });
-})
+});

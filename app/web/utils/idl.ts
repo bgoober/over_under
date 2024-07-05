@@ -1251,7 +1251,7 @@ export type IDLType = {
       }
     ],
     "metadata": {
-      "address": "6qUeZY7njik5mb5Q3MCGkdyt8NSvyLtAxsDnErhVm6dV"
+      "address": "H4Dn3vrTJPz8cmVWE15rLa9gtA5fjyakTx3KsfSay1VR"
     }
   }
 
@@ -2508,6 +2508,6 @@ export type IDLType = {
       }
     ],
     "metadata": {
-      "address": "6qUeZY7njik5mb5Q3MCGkdyt8NSvyLtAxsDnErhVm6dV"
+      "address": "H4Dn3vrTJPz8cmVWE15rLa9gtA5fjyakTx3KsfSay1VR"
     }
   }

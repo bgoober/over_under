@@ -1053,7 +1053,7 @@ export type OverUnder = {
   ],
   "accounts": [
     {
-      "name": "global",
+      "name": "Global",
       "docs": [
         "There are 3 Accounts possible: Global, representing the global state of the game.",
         "/// Round, representing a round of the game.",
@@ -1086,7 +1086,7 @@ export type OverUnder = {
       }
     },
     {
-      "name": "round",
+      "name": "Round",
       "type": {
         "kind": "struct",
         "fields": [
@@ -1126,7 +1126,7 @@ export type OverUnder = {
       }
     },
     {
-      "name": "bet",
+      "name": "Bet",
       "type": {
         "kind": "struct",
         "fields": [
@@ -1249,7 +1249,10 @@ export type OverUnder = {
       "name": "Max10PlayersReached",
       "msg": "10 Player Maximum Reached. Try again next round!"
     }
-  ]
+  ],
+  "metadata": {
+    "address": "4NE4QusNajaeH8NcYXhC56jFAroM52SKkseutCuNyUBc"
+  }
 };
 
 export const IDL: OverUnder = {
@@ -2307,7 +2310,7 @@ export const IDL: OverUnder = {
   ],
   "accounts": [
     {
-      "name": "global",
+      "name": "Global",
       "docs": [
         "There are 3 Accounts possible: Global, representing the global state of the game.",
         "/// Round, representing a round of the game.",
@@ -2340,7 +2343,7 @@ export const IDL: OverUnder = {
       }
     },
     {
-      "name": "round",
+      "name": "Round",
       "type": {
         "kind": "struct",
         "fields": [
@@ -2380,7 +2383,7 @@ export const IDL: OverUnder = {
       }
     },
     {
-      "name": "bet",
+      "name": "Bet",
       "type": {
         "kind": "struct",
         "fields": [
@@ -2503,5 +2506,8 @@ export const IDL: OverUnder = {
       "name": "Max10PlayersReached",
       "msg": "10 Player Maximum Reached. Try again next round!"
     }
-  ]
-};
+  ],
+  "metadata": {
+    "address": "4NE4QusNajaeH8NcYXhC56jFAroM52SKkseutCuNyUBc"
+  }
+}

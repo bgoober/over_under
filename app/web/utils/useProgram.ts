@@ -1,30 +1,27 @@
 import { useEffect, useState } from "react";
 import { Connection, PublicKey } from "@solana/web3.js";
-import * as anchor from "@coral-xyz/anchor";
-import { OverUnder } from "../utils/over_under";
-import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
+import  * as anchor from "@coral-xyz/anchor";;
+import  { AnchorProvider } from  "@coral-xyz/anchor";;
+import { IDLType } from "./idl";
+
 import idl from "./over_under.json"
 
-import { web3 } from "@coral-xyz/anchor";
-import { IDLData, IDLType } from "@/utils/idl";
-
-import { ConnectionProvider } from "@solana/wallet-adapter-react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-
-import type { AppProps } from "next/app";
-import dynamic from "next/dynamic";
-
-
-const PROGRAM = IDLData.metadata.address;
-const programID = new PublicKey(PROGRAM);
+const PROGRAM_ADDRESS = idl.metadata.address;
+const programID = new PublicKey(PROGRAM_ADDRESS);
 
 export interface Wallet {
+  signTransaction(
+    tx: anchor.web3.Transaction
+  ): Promise<anchor.web3.Transaction>;
+  signAllTransactions(
+    txs: anchor.web3.Transaction[]
+  ): Promise<anchor.web3.Transaction[]>;
   publicKey: anchor.web3.PublicKey;
 }
 
 type ProgramProps = {
   connection: Connection;
-  wallet?: Wallet;
+  wallet: Wallet;
 };
 
 export const useProgram = ({ connection, wallet }: ProgramProps) => {
@@ -35,12 +32,11 @@ export const useProgram = ({ connection, wallet }: ProgramProps) => {
   }, [connection, wallet]);
 
   const updateProgram = () => {
-    if (!wallet) return
-    const provider = new anchor.AnchorProvider(connection, wallet as anchor.Wallet, {
+    const provider = new anchor.AnchorProvider(connection, wallet, {
       preflightCommitment: "recent",
       commitment: "processed",
     });
-    const program = new anchor.Program(idl as any, programID, provider);
+    const program = new anchor.Program(idl as IDLType, programID, provider);
     setProgram(program);
   };
 
@@ -48,3 +44,8 @@ export const useProgram = ({ connection, wallet }: ProgramProps) => {
     program,
   };
 };
+
+
+
+
+

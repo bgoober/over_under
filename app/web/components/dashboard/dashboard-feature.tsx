@@ -10,7 +10,7 @@ import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
 import { BN, web3 } from '@coral-xyz/anchor';
 import { Keypair, PublicKey, sendAndConfirmTransaction } from '@solana/web3.js';
 
-import hosue_wallet from '/home/agent/.config/solana/id.json';
+import hosue_wallet from '../../../../house.json';
 import { SystemProgram } from '@solana/web3.js';
 // import wallet2 from '../../../../wallet.json';
 const house = Keypair.fromSecretKey(new Uint8Array(hosue_wallet));
@@ -107,7 +107,7 @@ export default function DashboardFeature() {
     if (!program || !wallet) return;
     const amount = new BN(solAmountUnder);
 
-    // console.log("Program:", program);
+    console.log("Program:", program);
     // console.log("Methods available:", program?.methods);
 
     const betnumber = 0;
@@ -144,7 +144,7 @@ export default function DashboardFeature() {
       [Buffer.from('bet'), round.toBuffer(), wallet.publicKey.toBuffer()],
       program.programId
     );
-
+    console.log("im arribe here");
     const tx = await program.methods
       .placeBet(amount, betnumber, round_number)
       .accounts({

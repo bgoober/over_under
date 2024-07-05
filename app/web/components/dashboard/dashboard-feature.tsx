@@ -85,7 +85,7 @@ export default function DashboardFeature() {
     );
 
     const tx = await program.methods
-      .place_bet(amount, betnumber, round_number)
+      .placeBet(amount, betnumber, round_number)
       .accounts({
         player: wallet?.publicKey,
         house: house.publicKey,

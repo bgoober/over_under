@@ -270,7 +270,7 @@ export default function DashboardFeature() {
                 border: '1px solid white',
               }}
             />
-            <button onClick={handleBetUnder} className="button">
+            <button onClick={handleBetOver} className="button">
               Bet{' '}
               <span
                 style={{

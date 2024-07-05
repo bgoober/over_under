@@ -128,9 +128,8 @@ impl<'info> PlayRoundC<'info> {
                 }
             }
 
-            msg!("Round Outcome: {:?}", self.round.outcome);
             msg!("Round Number: {:?}", self.round.number);
-
+            msg!("Round Outcome: {:?}", self.round.outcome);
             msg!("Round Final Pot: {:?}", self.vault.lamports());
             Ok(())
         }

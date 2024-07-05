@@ -23,6 +23,11 @@ impl<'info> GlobalC<'info> {
             number: 50,
             bump: *bumps.get("global").unwrap(),
         });
+
+        msg!("global house: {}", self.global.house.to_string());
+        msg!("global init round: {}", self.global.round.to_string());
+        msg!("global init number: {}", self.global.house.to_string());
+
         Ok(())
     }
 }

@@ -1,3 +1,5 @@
+// @ts-ignore
+
 'use client';
 
 import { SetStateAction, useState } from 'react';
@@ -7,15 +9,11 @@ import { useProgram } from '../../utils/useProgram';
 import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
 import { BN, web3 } from '@coral-xyz/anchor';
 import { Keypair, PublicKey, sendAndConfirmTransaction } from '@solana/web3.js';
-import { OverUnder } from '../../utils/over_under';
 
-// use my local keypair for signing
-import wallet from '/home/agent/.config/solana/id.json';
+import hosue_wallet from '/home/agent/.config/solana/id.json';
+import { SystemProgram } from '@solana/web3.js';
 // import wallet2 from '../../../../wallet.json';
-
-
-// Get the keypair from the wallet
-const house = Keypair.fromSecretKey(new Uint8Array(wallet));
+const house = Keypair.fromSecretKey(new Uint8Array(hosue_wallet));
 // const player1 = Keypair.fromSecretKey(new Uint8Array(wallet2));
 
 export default function DashboardFeature() {
@@ -87,7 +85,7 @@ export default function DashboardFeature() {
     );
 
     const tx = await program.methods
-      .placeBet(amount, betnumber, round_number)
+      .place_bet(amount, betnumber, round_number)
       .accounts({
         player: wallet?.publicKey,
         house: house.publicKey,
@@ -95,6 +93,7 @@ export default function DashboardFeature() {
         round,
         vault,
         bet,
+        systemProgram: SystemProgram.programId,
       })
       .rpc({
         skipPreflight: true,

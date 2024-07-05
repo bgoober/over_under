@@ -69,27 +69,27 @@ impl<'info> BetC<'info> {
                 bump: *bumps.get("bet").unwrap(),
             });
 
-            // print the round.bets vector
-            msg!(&format!(
-                "before push - round.bets.len(): {:#?}",
-                self.round.bets
-            ));
+            // // print the round.bets vector
+            // msg!(&format!(
+            //     "before push - round.bets.len(): {:#?}",
+            //     self.round.bets
+            // ));
 
             self.round.bets.push(self.bet.key());
 
             self.round.players.push(self.bet.player.key());
 
-            msg!(&format!(
-                "after push - round.bets.len(): {:#?}",
-                self.round.bets
-            ));
+            // msg!(&format!(
+            //     "after push - round.bets.len(): {:#?}",
+            //     self.round.bets
+            // ));
 
             msg!("bet.player {}", self.bet.player);
             msg!("bet.amount {}", self.bet.amount);
             msg!("bet.bet {}", self.bet.bet);
             msg!("bet.round {}", self.bet.round);
             msg!("bet.payout {}", self.bet.payout);
-            msg!("round.bets.len(): {}", self.round.bets.len());
+            // msg!("round.bets.len(): {}", self.round.bets.len());
 
             Ok(())
         }

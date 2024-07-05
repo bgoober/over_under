@@ -5,16 +5,20 @@ import { OverUnder } from "../utils/over_under";
 import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
 import idl from "./over_under.json"
 
-const PROGRAM = idl.metadata.address;
+import { web3 } from "@coral-xyz/anchor";
+import { IDLData, IDLType } from "@/utils/idl";
+
+import { ConnectionProvider } from "@solana/wallet-adapter-react";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+
+import type { AppProps } from "next/app";
+import dynamic from "next/dynamic";
+
+
+const PROGRAM = IDLData.metadata.address;
 const programID = new PublicKey(PROGRAM);
 
 export interface Wallet {
-  signTransaction(
-    tx: anchor.web3.Transaction
-  ): Promise<anchor.web3.Transaction>;
-  signAllTransactions(
-    txs: anchor.web3.Transaction[]
-  ): Promise<anchor.web3.Transaction[]>;
   publicKey: anchor.web3.PublicKey;
 }
 
@@ -32,7 +36,7 @@ export const useProgram = ({ connection, wallet }: ProgramProps) => {
 
   const updateProgram = () => {
     if (!wallet) return
-    const provider = new anchor.AnchorProvider(connection, wallet, {
+    const provider = new anchor.AnchorProvider(connection, wallet as anchor.Wallet, {
       preflightCommitment: "recent",
       commitment: "processed",
     });

@@ -53,6 +53,7 @@ impl <'info> RoundC<'info> {
         msg!("round.number: {}", self.round.number);
         msg!("round.outcome: {}", self.round.outcome);
         msg!("round.bets.len(): {}", self.round.bets.len());
+        msg!("round.players.len(): {}", self.round.players.len());
         
         Ok(())
     }

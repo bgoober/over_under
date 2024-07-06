@@ -1,25 +1,25 @@
 import { useEffect, useState } from "react";
 import { Connection, PublicKey } from "@solana/web3.js";
 import * as anchor from "@coral-xyz/anchor";
-import { OverUnder } from "../utils/over_under";
-import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
+
 import idl from "./over_under.json"
 
-import { web3 } from "@coral-xyz/anchor";
-import { IDLData, IDLType } from "@/utils/idl";
+import { IDLData} from "@/utils/idl";
 
-import { ConnectionProvider } from "@solana/wallet-adapter-react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-
-import type { AppProps } from "next/app";
-import dynamic from "next/dynamic";
+import  { AnchorProvider } from  "@coral-xyz/anchor";;
+import { IDLType } from "./idl";
 
 
-const PROGRAM = IDLData.metadata.address;
-const programID = new PublicKey(PROGRAM);
+const PROGRAM_ADDRESS = idl.metadata.address;
+const programID = new PublicKey(PROGRAM_ADDRESS);
 
 export interface Wallet {
-  publicKey: anchor.web3.PublicKey;
+  signTransaction(
+    tx: anchor.web3.Transaction
+  ): Promise<anchor.web3.Transaction>;
+  signAllTransactions(
+    txs: anchor.web3.Transaction[]
+  ): Promise<anchor.web3.Transaction[]>;
 }
 
 type ProgramProps = {

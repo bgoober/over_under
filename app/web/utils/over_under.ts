@@ -1249,7 +1249,10 @@ export type OverUnder = {
       "name": "Max10PlayersReached",
       "msg": "10 Player Maximum Reached. Try again next round!"
     }
-  ]
+  ],
+  "metadata": {
+    "address": "6qUeZY7njik5mb5Q3MCGkdyt8NSvyLtAxsDnErhVm6dV"
+  }
 };
 
 export const IDL: OverUnder = {
@@ -2503,5 +2506,9 @@ export const IDL: OverUnder = {
       "name": "Max10PlayersReached",
       "msg": "10 Player Maximum Reached. Try again next round!"
     }
-  ]
-};
+  ],
+  "metadata": {
+    /// DOCS: Make sure this address metadata is part of your idl file in both places for your client, or an uknown action error occurs.
+    "address": "6qUeZY7njik5mb5Q3MCGkdyt8NSvyLtAxsDnErhVm6dV"
+  }
+}

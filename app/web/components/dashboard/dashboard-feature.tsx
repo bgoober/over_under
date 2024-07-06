@@ -49,7 +49,7 @@ export default function DashboardFeature() {
   };
 
   const handleBetOver = async () => {
-    console.log(`Betting over with ${solAmountOver} SOL`);
+    console.log(`Betting OVER with ${solAmountOver} SOL`);
     if (!program || !wallet) return;
     const amount = new BN(solAmountOver);
     const betnumber = 1;
@@ -83,6 +83,8 @@ export default function DashboardFeature() {
       [Buffer.from('bet'), round.toBuffer(), wallet.publicKey.toBuffer()],
       program.programId
     );
+    console.log(`global: `, global.toBase58());
+    console.log(`round: `, round.toBase58());
 
     const tx = await program.methods
       .placeBet(amount, betnumber, round_number)
@@ -103,7 +105,7 @@ export default function DashboardFeature() {
   };
 
   const handleBetUnder = async () => {
-    console.log(`Betting over with ${solAmountUnder} SOL`);
+    console.log(`Betting UNDER with ${solAmountUnder} SOL`);
     if (!program || !wallet) return;
     const amount = new BN(solAmountUnder);
 
@@ -208,7 +210,7 @@ export default function DashboardFeature() {
             style={{
               width: '40%',
               alignSelf: 'flex-end',
-              paddingBottom: '35%',
+              paddingBottom: '20%',
             }}
           >
             <button onClick={handleBetUnder} className="button">
@@ -255,7 +257,7 @@ export default function DashboardFeature() {
             style={{
               width: '40%',
               alignSelf: 'flex-end',
-              paddingBottom: '35%',
+              paddingBottom: '20%',
             }}
           >
             <input

@@ -10,10 +10,10 @@ import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
 import { BN, web3 } from '@coral-xyz/anchor';
 import { Keypair, PublicKey, sendAndConfirmTransaction } from '@solana/web3.js';
 
-import hosue_wallet from '/home/agent/.config/solana/id.json';
+import house_wallet from '/home/agent/.config/solana/id.json';
 import { SystemProgram } from '@solana/web3.js';
 // import wallet2 from '../../../../wallet.json';
-const house = Keypair.fromSecretKey(new Uint8Array(hosue_wallet));
+const house = Keypair.fromSecretKey(new Uint8Array(house_wallet));
 // const player1 = Keypair.fromSecretKey(new Uint8Array(wallet2));
 
 export default function DashboardFeature() {

@@ -62,8 +62,8 @@ describe("over_under", () => {
     );
     const roundAccount = await program.account.round.fetch(round);
     console.log(`round: `, roundAccount.round.toString());
+    console.log('number of bets in round: ', roundAccount.bets.length)
 
-    console.log(`global round: }`, globalAccount.round.toString());
 
     let account = await anchor
       .getProvider()

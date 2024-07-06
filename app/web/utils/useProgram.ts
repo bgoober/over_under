@@ -36,11 +36,11 @@ export const useProgram = ({ connection, wallet }: ProgramProps) => {
 
   const updateProgram = () => {
     if (!wallet) return
-    const provider = new anchor.AnchorProvider(connection, wallet as anchor.Wallet, {
+    const provider = new anchor.AnchorProvider(connection, wallet, {
       preflightCommitment: "recent",
       commitment: "processed",
     });
-    const program = new anchor.Program(idl as any, programID, provider);
+    const program = new anchor.Program(idl as IDLType, programID, provider);
     setProgram(program);
   };
 

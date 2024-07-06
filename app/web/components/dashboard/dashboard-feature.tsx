@@ -83,9 +83,7 @@ export default function DashboardFeature() {
       [Buffer.from('bet'), round.toBuffer(), wallet.publicKey.toBuffer()],
       program.programId
     );
-    console.log(`global: `, global.toBase58());
     console.log(`round: `, round.toBase58());
-    console.log("test1")
     const tx = await program.methods
       .placeBet(amount, betnumber, round_number)
       .accounts({
@@ -102,7 +100,7 @@ export default function DashboardFeature() {
       })
       .then(confirm)
       .then(log);
-      console.log("test2")
+    console.log('Success');
   };
 
   const handleBetUnder = async () => {
@@ -119,7 +117,6 @@ export default function DashboardFeature() {
       [Buffer.from('global'), house.publicKey.toBuffer()],
       program.programId
     );
-    console.log(`global: `, global.toBase58());
     const globalAccount = await program.account.global.fetch(global);
     // console.log(globalAccount.round)
 
@@ -130,8 +127,6 @@ export default function DashboardFeature() {
       program.programId
     );
 
-    // console.log(globalAccount.round)
-    console.log(`round: `, round.toBase58());
     const roundAccount = await program.account.round.fetch(round);
     // console.log(`roundAccount: `, roundAccount);
 
@@ -147,7 +142,7 @@ export default function DashboardFeature() {
       [Buffer.from('bet'), round.toBuffer(), wallet.publicKey.toBuffer()],
       program.programId
     );
-    console.log("test1")
+    console.log(`round: `, round.toBase58());
     const tx = await program.methods
       .placeBet(amount, betnumber, round_number)
       .accounts({
@@ -163,8 +158,7 @@ export default function DashboardFeature() {
       })
       .then(confirm)
       .then(log);
-
-      console.log("test2")
+    console.log('Success');
   };
 
   return (

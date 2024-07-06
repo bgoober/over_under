@@ -105,7 +105,7 @@ describe("over_under", () => {
     );
 
     console.log(`bet2: `, bet2.toString());
-    const amount2BN = new BN(150000000);
+    const amount2BN = new BN(1);
     const roundNumber2BN = new BN(round_number);
 
     const tx2 = await program.methods

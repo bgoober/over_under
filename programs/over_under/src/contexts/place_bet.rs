@@ -103,6 +103,7 @@ impl<'info> BetC<'info> {
 
         let ctx = CpiContext::new(self.system_program.to_account_info(), accounts);
 
-        transfer(ctx, amount)
+        // We multiply the amount x 1 million here to equalize the bet into 1 whole SOL 
+        transfer(ctx, amount*1_000_000_000)
     }
 }

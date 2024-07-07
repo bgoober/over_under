@@ -135,6 +135,9 @@ describe("over_under", () => {
       .rpc()
       .then(confirm)
       .then(log);
+
+
+      // after the assesswinners, we want to print the wallet?'s Bet account account information
   });
 
   it("Payed Out!", async () => {

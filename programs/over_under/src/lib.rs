@@ -58,6 +58,9 @@ pub mod over_under {
 
             let vault = ctx.accounts.vault.lamports();
 
+            let vault_f64 = vault as f64;
+
+
             for account in ctx.remaining_accounts.iter() {
                 let _account_key = account.key();
                 let data = account.try_borrow_mut_data()?;
@@ -81,8 +84,12 @@ pub mod over_under {
 
             // Apply collected changes outside the previous loop
             for (account, account_to_write) in winner_accounts.iter_mut() {
-                let payout = (account_to_write.amount as u64 / total_winners_pot) * vault; // Ensure correct division
-                account_to_write.payout = payout;
+                // Ensure total_winners_pot is not zero to avoid division by zero
+                if total_winners_pot > 0 {
+                    // Convert to f64 for division, then multiply by vault, and finally round or truncate as needed
+                    let payout = (((account_to_write.amount as f64) / (total_winners_pot as f64)) * vault_f64).round() as u64; // Adjust rounding as necessary
+            
+                    account_to_write.payout = payout;
 
                 // Find the account by account_key to serialize data back
                 if let Some(account) = ctx
@@ -93,7 +100,10 @@ pub mod over_under {
                     let mut data = account.try_borrow_mut_data()?;
                     let _ = account_to_write.try_serialize(&mut data.as_mut());
                 }
-            }
+                msg!("Bet? account key: {}", account.key());
+                msg!("Bet player key: {}", account_to_write.player);
+                msg!("Bet payout: {}", account_to_write.payout);
+            }}
         }
         Ok(())
     }

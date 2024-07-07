@@ -30,7 +30,9 @@ pub struct RoundC<'info> {
     pub round: Box<Account<'info, Round>>,
 
     // vault pda of the round account
-    #[account(seeds = [b"vault", round.key().as_ref()], bump)]
+    /// DOCS: mut must be placed with the vault during initRound or a non-House player will not be able to call placeBet without the House key playing the first bet of each Round (this throws an unkown action undefined error for the player). 
+    /// With the mut, any player can call placeBet in a Round with 0 bets. 
+    #[account(mut, seeds = [b"vault", round.key().as_ref()], bump)]
     pub vault: SystemAccount<'info>,
 
     pub system_program: Program<'info, System>,

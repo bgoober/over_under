@@ -51,7 +51,12 @@ export default function DashboardFeature() {
   const handleBetOver = async () => {
     console.log(`Betting OVER with ${solAmountOver} SOL`);
     if (!program || !wallet) return;
-    const amount = new BN(solAmountOver);
+    // Assuming solAmountUnder is a string representing the SOL amount,
+    // convert it to a BigNumber representing lamports.
+    // 1 SOL = 1,000,000,000 lamports
+    const lamportsPerSol = new BN(1_000_000_000);
+    const amountInSol = new BN(solAmountOver); // This might need parsing if solAmountUnder is not already a BN compatible format
+    const amountInLamports = amountInSol.mul(lamportsPerSol);
     const betnumber = 1;
 
     const [global] = web3.PublicKey.findProgramAddressSync(
@@ -85,7 +90,7 @@ export default function DashboardFeature() {
     );
     console.log(`round: `, round.toBase58());
     const tx = await program.methods
-      .placeBet(amount, betnumber, round_number)
+      .placeBet(amountInLamports, betnumber, round_number)
       .accounts({
         player: wallet?.publicKey,
         house: house.publicKey,
@@ -106,7 +111,13 @@ export default function DashboardFeature() {
   const handleBetUnder = async () => {
     console.log(`Betting UNDER with ${solAmountUnder} SOL`);
     if (!program || !wallet) return;
-    const amount = new BN(solAmountUnder);
+
+    // Assuming solAmountUnder is a string representing the SOL amount,
+    // convert it to a BigNumber representing lamports.
+    // 1 SOL = 1,000,000,000 lamports
+    const lamportsPerSol = new BN(1_000_000_000);
+    const amountInSol = new BN(solAmountUnder); // This might need parsing if solAmountUnder is not already a BN compatible format
+    const amountInLamports = amountInSol.mul(lamportsPerSol);
 
     // console.log("Program:", program);
     // console.log("Methods available:", program?.methods);
@@ -144,7 +155,7 @@ export default function DashboardFeature() {
     );
     console.log(`round: `, round.toBase58());
     const tx = await program.methods
-      .placeBet(amount, betnumber, round_number)
+      .placeBet(amountInLamports, betnumber, round_number)
       .accounts({
         player: wallet?.publicKey,
         house: house.publicKey,

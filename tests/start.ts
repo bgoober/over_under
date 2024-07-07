@@ -129,8 +129,14 @@ describe("over_under", () => {
     const amountBN = new BN(10);
     const roundNumberBN = new BN(round_number);
 
+    // Assuming solAmountUnder is a string representing the SOL amount,
+    // convert it to a BigNumber representing lamports.
+    // 1 SOL = 1,000,000,000 lamports
+    const lamportsPerSol = new BN(1_000_000_000);
+    const amountInLamports = amountBN.mul(lamportsPerSol);
+
     const tx = await program.methods
-      .placeBet(amountBN, 1, roundNumberBN) // Use BN objects for the first and third arguments
+      .placeBet(amountInLamports, 1, roundNumberBN) // Use BN objects for the first and third arguments
       .accounts({
         house: keypair.publicKey,
         global,

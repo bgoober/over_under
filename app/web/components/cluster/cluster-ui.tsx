@@ -3,12 +3,13 @@
 import { useConnection } from '@solana/wallet-adapter-react';
 import { IconAddressBook, IconTrash } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { AppModal } from '../ui/ui-layout';
 import { ClusterNetwork, useCluster } from './cluster-data-access';
 import { Connection } from '@solana/web3.js';
 import ReactMarkdown from 'react-markdown';
-
+import { Carousel } from 'react-responsive-carousel';
+import 'react-responsive-carousel/lib/styles/carousel.min.css'; // Import carousel styles
 
 export function ExplorerLink({
   path,
@@ -90,7 +91,6 @@ export function ClusterUiSelect() {
   );
 }
 
-// for the global button modal
 export function ExplainerUiModal({
   hideModal,
   show,
@@ -99,32 +99,60 @@ export function ExplainerUiModal({
   show: boolean;
 }) {
   const markdown = `
-  ### 1. A random number 0-100 is generated every Round.
-  ### 2. Players bet on whether the outcome of current Round's Random Number will be:
-  -- higher than (over) the previous Round's Random Number. --
+### 1. A random number 0-100 is generated every Round.
+### 2. Players bet on whether the outcome of current Round's Random Number will be:
+-- higher than (over) the previous Round's Random Number. --
 
-                            or                                
-  -- lower than (under) the previous Round's Random Number. --
-  ### 3. Losers pay Winners.
-  ### 4. player_winnings = (player_bet / winning_bets_sum) * total_pot
-  ### 5. If the random number is the same as the previous number, or if everyone loses, the House wins the entire pot. 
+                          or                                
+-- lower than (under) the previous Round's Random Number. --
+### 3. Losers pay Winners.
+### 4. player_winnings = (player_bet / winning_bets_sum) * total_pot
+### 5. If the random number is the same as the previous number, or if everyone loses, the House wins the entire pot. 
 
-  [**Link to GitHub**](https://github.com/bgoober/over_under)
-  `;
+[**Link to GitHub**](https://github.com/bgoober/over_under)
+`;
+
+  const [view, setView] = useState('markdown'); // 'markdown' or 'image'
+
+  useEffect(() => {
+    const handleKeyDown = (e: { key: string }) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        setView((currentView) =>
+          currentView === 'markdown' ? 'image' : 'markdown'
+        );
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   return (
-    <AppModal
-      title="Over / Under"
-      hide={hideModal}
-      show={show}
-    >
-      <ReactMarkdown
-        components={{
-          a: ({node, ...props}) => <a {...props} target="_blank" rel="noopener noreferrer" />
-        }}
-      >
-        {markdown}
-      </ReactMarkdown>
+    <AppModal title="Over / Under" hide={hideModal} show={show}>
+      {view === 'markdown' ? (
+        <ReactMarkdown
+          components={{
+            a: ({ node, ...props }) => (
+              <a {...props} target="_blank" rel="noopener noreferrer" />
+            ),
+          }}
+        >
+          {markdown}
+        </ReactMarkdown>
+      ) : (
+        <div style={{ textAlign: 'center' }}>
+          <a href="/Over_Under.png" target="_blank" rel="noopener noreferrer">
+            <img
+              src="/Over_Under.png"
+              alt="Over Under Game"
+              style={{ maxWidth: '100%', maxHeight: '100%' }}
+            />
+          </a>
+        </div>
+      )}
     </AppModal>
   );
 }
@@ -236,7 +264,7 @@ export function ClusterUiTable() {
                     onClick={() => {
                       if (!window.confirm('Are you sure?')) return;
                       deleteCluster(item);
-                    }} 
+                    }}
                   >
                     <IconAddressBook size={16} />
                   </button>
@@ -246,7 +274,7 @@ export function ClusterUiTable() {
           </tbody>
         </table>
       </div>
-      
+
       <div className="overflow-x-auto">
         <table className="table border-4 border-separate border-base-300">
           <thead>

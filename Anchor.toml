@@ -24,4 +24,6 @@ play = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/play_round.ts"
 assess = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/assess_winners.ts"
 payout = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/payout.ts"
 close = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/close_round.ts"
+start = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/start.ts"
+finish = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/finish.ts"
 

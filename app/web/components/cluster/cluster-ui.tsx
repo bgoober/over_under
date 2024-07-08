@@ -101,12 +101,12 @@ export function ExplainerUiModal({
   const markdown = `
 ### 1. A random number 0-100 is generated every Round.
 ### 2. Players bet on whether the outcome of current Round's Random Number will be:
--- higher than (over) the previous Round's Random Number. --
+-- **higher** than (over) the previous Round's Random Number. --
 
                           or                                
--- lower than (under) the previous Round's Random Number. --
+-- **lower** than (under) the previous Round's Random Number. --
 ### 3. Losers pay Winners.
-### 4. player_winnings = (player_bet / winning_bets_sum) * total_pot
+### 4. player_winnings = ( player_bet  /  winning_bets_sum ) * total_pot
 ### 5. If the random number is the same as the previous number, or if everyone loses, the House wins the entire pot. 
 
 [**Link to GitHub**](https://github.com/bgoober/over_under)
@@ -130,29 +130,74 @@ export function ExplainerUiModal({
     };
   }, []);
 
+  const handleArrowClick = (direction: 'left' | 'right') => {
+    setView((currentView) =>
+      currentView === 'markdown' ? 'image' : 'markdown'
+    );
+  };
+
   return (
     <AppModal title="Over / Under" hide={hideModal} show={show}>
-      {view === 'markdown' ? (
-        <ReactMarkdown
-          components={{
-            a: ({ node, ...props }) => (
-              <a {...props} target="_blank" rel="noopener noreferrer" />
-            ),
-          }}
-        >
-          {markdown}
-        </ReactMarkdown>
-      ) : (
-        <div style={{ textAlign: 'center' }}>
-          <a href="/Over_Under.png" target="_blank" rel="noopener noreferrer">
-            <img
-              src="/Over_Under.png"
-              alt="Over Under Game"
-              style={{ maxWidth: '100%', maxHeight: '100%' }}
-            />
-          </a>
-        </div>
-      )}
+      <div
+        style={{ textAlign: 'left', marginLeft: '0.5rem', overflowX: 'auto' }}
+      >
+        {view === 'markdown' && (
+          <>
+            <div
+              style={{
+                position: 'absolute',
+                left: 0,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                cursor: 'pointer',
+                fontSize: '2em',
+              }}
+              onClick={() => handleArrowClick('left')}
+            >
+              {/* Left Arrow Icon */}
+              &#8592;
+            </div>
+            <div
+              style={{
+                position: 'absolute',
+                right: 0,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                cursor: 'pointer',
+                fontSize: '2em',
+              }}
+              onClick={() => handleArrowClick('right')}
+            >
+              {/* Right Arrow Icon */}
+              &#8594;
+            </div>
+          </>
+        )}
+        {view === 'markdown' ? (
+          <ReactMarkdown
+            components={{
+              a: ({ node, ...props }) => (
+                <a {...props} target="_blank" rel="noopener noreferrer" />
+              ),
+            }}
+          >
+            {markdown}
+          </ReactMarkdown>
+        ) : (
+          <div style={{ textAlign: 'center' }}>
+            <p> Click to Enlarge </p>
+            <p> - </p>
+
+            <a href="/Game Loop.png" target="_blank" rel="noopener noreferrer">
+              <img
+                src="/Game Loop.png"
+                alt="Over Under Game"
+                style={{ maxWidth: '100%', maxHeight: '100%' }}
+              />
+            </a>
+          </div>
+        )}
+      </div>
     </AppModal>
   );
 }

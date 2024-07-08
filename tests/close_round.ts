@@ -59,12 +59,18 @@ describe("over_under", () => {
           program.programId
         );
     
+        const [vault] = web3.PublicKey.findProgramAddressSync(
+          [Buffer.from("vault"), round.toBuffer()],
+          program.programId
+        );
+        
         const tx = await program.methods
           .closeRound() // Use BN objects for the first and third arguments
           .accounts({
             house: keypair.publicKey,
             global,
             round,
+            vault,
             systemProgram: SystemProgram.programId,
           })
           .signers([keypair])

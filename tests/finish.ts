@@ -17,7 +17,7 @@ import BN from "bn.js";
 
 // use my local keypair for signing
 import wallet from "/home/agent/.config/solana/id.json";
-
+const house = new PublicKey('4QPAeQG6CTq2zMJAVCJnzY9hciQteaMkgBmcyGL7Vrwp');
 // Get the keypair from the wallet
 const keypair = Keypair.fromSecretKey(new Uint8Array(wallet));
 
@@ -237,12 +237,18 @@ describe("over_under", () => {
       program.programId
     );
 
+    const [vault] = web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("vault"), round.toBuffer()],
+      program.programId
+    );
+
     const tx = await program.methods
       .closeRound() // Use BN objects for the first and third arguments
       .accounts({
-        house: keypair.publicKey,
+        house,
         global,
         round,
+        vault,
         systemProgram: SystemProgram.programId,
       })
       .signers([keypair])

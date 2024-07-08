@@ -10,10 +10,9 @@ import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
 import { BN, web3 } from '@coral-xyz/anchor';
 import { Keypair, PublicKey, sendAndConfirmTransaction } from '@solana/web3.js';
 
-import house_wallet from '/home/agent/.config/solana/id.json';
 import { SystemProgram } from '@solana/web3.js';
 // import wallet2 from '../../../../wallet.json';
-const house = Keypair.fromSecretKey(new Uint8Array(house_wallet));
+const house = new PublicKey('4QPAeQG6CTq2zMJAVCJnzY9hciQteaMkgBmcyGL7Vrwp');
 // const player1 = Keypair.fromSecretKey(new Uint8Array(wallet2));
 
 export default function DashboardFeature() {
@@ -26,21 +25,18 @@ export default function DashboardFeature() {
   const [currentRound, setCurrentRound] = useState<number>(0);
   const [numberOfPlayers, setNumberOfPlayers] = useState<number>(0);
   const [previousRandomNumber, setPreviousRandomNumber] = useState<number>(0);
+  const [totalPotAmount, SettotalPotAmount] = useState<number>(0);
 
   const { program } = useProgram({ connection, wallet });
   useEffect(() => {
-    // console.log('program: {}', program);
     if (!program) return; // Add null check for program
 
-    // Async function to fetch and set the state variables
     const fetchData = async () => {
-      // Assuming `program` and `house` are already defined
       const [global] = web3.PublicKey.findProgramAddressSync(
-        [Buffer.from('global'), house.publicKey.toBuffer()],
+        [Buffer.from('global'), house.toBuffer()],
         program.programId
       );
       const globalAccount = await program.account.global.fetch(global);
-      // console.log('global account: {}', globalAccount);
       const _roundBN = new BN((globalAccount.round as number).toString());
       const _roundBuffer = _roundBN.toArrayLike(Buffer, 'le', 8);
       const [round] = web3.PublicKey.findProgramAddressSync(
@@ -49,34 +45,34 @@ export default function DashboardFeature() {
       );
 
       const roundAccount = await program.account.round.fetch(round);
-      // console.log('roundAccount: {}', roundAccount);
+
+      const [vault] = web3.PublicKey.findProgramAddressSync(
+        [Buffer.from('vault'), round.toBuffer()],
+        program.programId
+      );
 
       let roundNumber = Number(globalAccount.round);
       let numPlayers = (roundAccount.players as Array<PublicKey>).length;
-      // let numPlayers = 0;
       let prevRanNum = globalAccount.number;
+      const vaultAccountInfo = await connection.getAccountInfo(vault);
+      let potInLamports = vaultAccountInfo?.lamports ?? 0;
+      let potInSOL = potInLamports / 1e9;
 
       // Set the state variables with the fetched data
       setCurrentRound(roundNumber as number);
-      // Assuming `roundAccount.players` and `roundAccount.previousRandomNumber` exist
       setNumberOfPlayers(numPlayers as number);
       setPreviousRandomNumber(prevRanNum as number);
+      SettotalPotAmount(potInSOL as number);
     };
 
-    // Call the fetch function immediately to update state on component mount
-    fetchData().catch((error) => {
-      console.error('Fetching data failed:', error);
-      // Optionally set an error state here
-    });
+    fetchData().catch(console.error); // Initial fetch
 
-    // Set up a timer to refresh state periodically
     const intervalId = setInterval(() => {
       fetchData().catch(console.error);
-    }, 2500); // Refresh every 2500 milliseconds (2.5 seconds)
+    }, 1000); // Refresh every 1000 milliseconds (1 second)
 
-    // Clean up the interval on component unmount
-    return () => clearInterval(intervalId);
-  }, [program]); // Empty dependency array means this effect runs once on mount
+    return () => clearInterval(intervalId); // Cleanup on component unmount
+  }, [program]); // Depend on `program` to re-run effect if it changes
   // when the program is updated, the useEffect is updated
 
   const handleSolAmountChangeOver = (event: {
@@ -114,7 +110,7 @@ export default function DashboardFeature() {
     const betnumber = 1;
 
     const [global] = web3.PublicKey.findProgramAddressSync(
-      [Buffer.from('global'), house.publicKey.toBuffer()],
+      [Buffer.from('global'), house.toBuffer()],
       program.programId
     );
     const globalAccount = await program.account.global.fetch(global);
@@ -147,7 +143,7 @@ export default function DashboardFeature() {
       .placeBet(amountInLamports, betnumber, round_number)
       .accounts({
         player: wallet?.publicKey,
-        house: house.publicKey,
+        house: house,
         global,
         round,
         vault,
@@ -179,7 +175,7 @@ export default function DashboardFeature() {
     const betnumber = 0;
 
     const [global] = web3.PublicKey.findProgramAddressSync(
-      [Buffer.from('global'), house.publicKey.toBuffer()],
+      [Buffer.from('global'), house.toBuffer()],
       program.programId
     );
     const globalAccount = await program.account.global.fetch(global);
@@ -212,7 +208,7 @@ export default function DashboardFeature() {
       .placeBet(amountInLamports, betnumber, round_number)
       .accounts({
         player: wallet?.publicKey,
-        house: house.publicKey,
+        house: house,
         global,
         round,
         vault,
@@ -232,130 +228,127 @@ export default function DashboardFeature() {
         title="Over / Under"
         subtitle="Bet on whether the current round's random number will be higher or lower than the previous round's random number, 0 - 100."
       >
-        {[
-          <div>
-            {/* Explainer Modal Section */}
-            <div
-              className="explainer-modal"
-              style={{ textAlign: 'center', marginBottom: '1rem' }}
-            >
-              <ExplainerUiModal
-                show={showModal}
-                hideModal={() => setShowModal(false)}
-              />
-              <button
-                className="btn btn-xs lg:btn-md btn-primary"
-                onClick={() => setShowModal(true)}
-                style={{ margin: 'auto', marginBottom: '1.5rem' }}
-              >
-                How It Works
-              </button>
-            </div>
-      
-            {/* Centered Current Round and Previous Number Section */}
-            <div className="text-center" style={{ marginBottom: '2rem' }}>
-              <div style={{ fontSize: '1rem', marginBottom: '1rem' }}>
-                <p>Current Round: {currentRound}</p>
-                <p>Number of Players: {numberOfPlayers}/10</p>
-              </div>
-              <div style={{ fontSize: '1.50rem' }}>
-                <p style={{ textAlign: 'center' }}>
-                  Previous Random Number:
-                  <br />
-                  <span style={{ display: 'block', fontSize: '2.5rem' }}>
-                    {previousRandomNumber}
-                  </span>
-                </p>
-              </div>
-            </div>
-      
-            {/* Flex container for Bet Over and Bet Under Sections */}
-            <div className="flex justify-between max-w-6xl mx-auto sm:px-6 lg:px-8">
-              {/* Bet Under Section */}
-              <div
-                className="flex justify-center items-center"
+        {/* Explainer Modal Section */}
+        <div
+          className="explainer-modal"
+          style={{ textAlign: 'center', marginBottom: '1rem' }}
+        >
+          <ExplainerUiModal
+            show={showModal}
+            hideModal={() => setShowModal(false)}
+          />
+          <button
+            className="btn btn-xs lg:btn-md btn-primary"
+            onClick={() => setShowModal(true)}
+            style={{ margin: 'auto', marginBottom: '1.5rem' }}
+          >
+            How It Works
+          </button>
+        </div>
+
+        {/* Centered Current Round and Previous Number Section */}
+        <div className="text-center" style={{ marginBottom: '2rem' }}>
+          <div style={{ fontSize: '1rem', marginBottom: '1rem' }}>
+            <p>Current Round: {currentRound}</p>
+            <p>Number of Players: {numberOfPlayers}/10</p>
+            <p>Round Pot: {totalPotAmount} SOL</p>
+          </div>
+          <div style={{ fontSize: '1.50rem' }}>
+            <p style={{ textAlign: 'center' }}>
+              Previous Random Number:
+              <br />
+              <span style={{ display: 'block', fontSize: '2.5rem' }}>
+                {previousRandomNumber}
+              </span>
+            </p>
+          </div>
+        </div>
+
+        {/* Flex container for Bet Over and Bet Under Sections */}
+        <div className="flex justify-between max-w-6xl mx-auto sm:px-6 lg:px-8">
+          {/* Bet Under Section */}
+          <div
+            className="flex justify-center items-center"
+            style={{
+              width: '40%',
+              alignSelf: 'flex-end',
+              paddingBottom: '20%',
+            }}
+          >
+            <button onClick={handleBetUnder} className="button">
+              Bet{' '}
+              <span
                 style={{
-                  width: '40%',
-                  alignSelf: 'flex-end',
-                  paddingBottom: '20%',
+                  textDecoration: 'underline',
+                  textDecorationColor: 'white',
+                  textDecorationThickness: '1px',
+                  textUnderlineOffset: '3px',
                 }}
               >
-                <button onClick={handleBetUnder} className="button">
-                  Bet{' '}
-                  <span
-                    style={{
-                      textDecoration: 'underline',
-                      textDecorationColor: 'white',
-                      textDecorationThickness: '1px',
-                      textUnderlineOffset: '3px',
-                    }}
-                  >
-                    Under
-                  </span>
-                </button>
-                <input
-                  type="number"
-                  value={solAmountUnder}
-                  onChange={handleSolAmountChangeUnder}
-                  className="input"
-                  placeholder="Bet SOL "
-                  style={{
-                    textAlign: 'right',
-                    marginLeft: '10px',
-                    border: '1px solid white',
-                  }}
-                />
-              </div>
-      
-              {/* Aesthetic Vertical Bar */}
-              <div
+                Under
+              </span>
+            </button>
+            <input
+              type="number"
+              value={solAmountUnder}
+              onChange={handleSolAmountChangeUnder}
+              className="input"
+              placeholder="Bet SOL "
+              style={{
+                textAlign: 'right',
+                marginLeft: '10px',
+                border: '1px solid white',
+              }}
+            />
+          </div>
+
+          {/* Aesthetic Vertical Bar */}
+          <div
+            style={{
+              height: '100px', // Adjust based on your design needs
+              width: '1px',
+              paddingBottom: '44%',
+              backgroundColor: '#FFFFFF', // Or any color that fits the design
+              alignSelf: 'center', // This centers the bar vertically within the flex container
+            }}
+          ></div>
+
+          {/* Bet Over Section */}
+          <div
+            className="flex justify-center items-center"
+            style={{
+              width: '40%',
+              alignSelf: 'flex-end',
+              paddingBottom: '20%',
+            }}
+          >
+            <input
+              type="number"
+              value={solAmountOver}
+              onChange={handleSolAmountChangeOver}
+              className="input"
+              placeholder="Bet SOL"
+              style={{
+                textAlign: 'left',
+                marginRight: '10px',
+                border: '1px solid white',
+              }}
+            />
+            <button onClick={handleBetOver} className="button">
+              Bet{' '}
+              <span
                 style={{
-                  height: '100px', // Adjust based on your design needs
-                  width: '1px',
-                  paddingBottom: '44%',
-                  backgroundColor: '#FFFFFF', // Or any color that fits the design
-                  alignSelf: 'center', // This centers the bar vertically within the flex container
-                }}
-              ></div>
-      
-              {/* Bet Over Section */}
-              <div
-                className="flex justify-center items-center"
-                style={{
-                  width: '40%',
-                  alignSelf: 'flex-end',
-                  paddingBottom: '20%',
+                  textDecoration: 'underline',
+                  textDecorationColor: 'white',
+                  textDecorationThickness: '1px',
+                  textUnderlineOffset: '3px',
                 }}
               >
-                <input
-                  type="number"
-                  value={solAmountOver}
-                  onChange={handleSolAmountChangeOver}
-                  className="input"
-                  placeholder="Bet SOL"
-                  style={{
-                    textAlign: 'left',
-                    marginRight: '10px',
-                    border: '1px solid white',
-                  }}
-                />
-                <button onClick={handleBetOver} className="button">
-                  Bet{' '}
-                  <span
-                    style={{
-                      textDecoration: 'underline',
-                      textDecorationColor: 'white',
-                      textDecorationThickness: '1px',
-                      textUnderlineOffset: '3px',
-                    }}
-                  >
-                    Over
-                  </span>
-                </button>
-              </div>
-            </div>
-          </div>,
-        ]}
+                Over
+              </span>
+            </button>
+          </div>
+        </div>
       </AppHero>
     </div>
   );

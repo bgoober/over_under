@@ -151,14 +151,14 @@ describe("over_under", () => {
       .then(confirm)
       .then(log);
 
-    // fetch the bet
-    //   const betAccount = await program.account.bet.fetch(bet);
-    //   const roundAccount2 = await program.account.round.fetch(round);
-    //   console.log(`bet amount: `, betAccount.amount.toString());
-    //   console.log("bet: ", betAccount.bet.toString());
-    //   // log the round.bets length
-    //   console.log(`round2 bets length: `, roundAccount2.bets.length);
-    //   console.log("round2 players: ", roundAccount2.players);
-    //   console.log("round2 bets: ", roundAccount2.bets);
+  //   // fetch the bet
+  //   //   const betAccount = await program.account.bet.fetch(bet);
+  //   //   const roundAccount2 = await program.account.round.fetch(round);
+  //   //   console.log(`bet amount: `, betAccount.amount.toString());
+  //   //   console.log("bet: ", betAccount.bet.toString());
+  //   //   // log the round.bets length
+  //   //   console.log(`round2 bets length: `, roundAccount2.bets.length);
+  //   //   console.log("round2 players: ", roundAccount2.players);
+  //   //   console.log("round2 bets: ", roundAccount2.bets);
   });
 });

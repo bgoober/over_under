@@ -188,10 +188,12 @@ or
           </ReactMarkdown>
         ) : (
           <div style={{ textAlign: 'center' }}>
-            <p> Click to Enlarge </p>
-            <p> - </p>
+            {/* <p> Click to Enlarge </p>
+            <p> &nbsp; </p> */}
 
             <a href="/Game Loop.png" target="_blank" rel="noopener noreferrer">
+            Click to Open ↗
+            <p> &nbsp; </p>
               <img
                 src="/Game Loop.png"
                 alt="Over Under Game"

@@ -142,10 +142,13 @@ export function AppHero({
   title,
   subtitle,
 }: {
-  children?: ReactNode;
+  children?: Array<ReactNode>;
   title: ReactNode;
   subtitle: ReactNode;
 }) {
+  // console.log("CHILDREN {}", children)
+  // console.log("TITLE {}", title)
+  // console.log("SUBTITLE {}", subtitle)
   return (
     <div className="hero py-[64px]">
       <div className="hero-content text-center">

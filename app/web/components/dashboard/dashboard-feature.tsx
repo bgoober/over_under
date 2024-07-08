@@ -29,8 +29,9 @@ export default function DashboardFeature() {
 
   const { program } = useProgram({ connection, wallet });
   useEffect(() => {
+    // console.log('program: {}', program);
     if (!program) return; // Add null check for program
-  
+
     // Async function to fetch and set the state variables
     const fetchData = async () => {
       // Assuming `program` and `house` are already defined
@@ -39,42 +40,44 @@ export default function DashboardFeature() {
         program.programId
       );
       const globalAccount = await program.account.global.fetch(global);
-  
+      // console.log('global account: {}', globalAccount);
       const _roundBN = new BN((globalAccount.round as number).toString());
       const _roundBuffer = _roundBN.toArrayLike(Buffer, 'le', 8);
       const [round] = web3.PublicKey.findProgramAddressSync(
         [Buffer.from('round'), global.toBuffer(), _roundBuffer],
         program.programId
       );
-  
-      const roundAccount = await program.account.round.fetch(round) as { players: any[] };
-      
-      let roundNumber = globalAccount.round;
-      let numPlayers = roundAccount.players.length;
-      let prevRanNum = globalAccount.number
-  
+
+      const roundAccount = await program.account.round.fetch(round);
+      // console.log('roundAccount: {}', roundAccount);
+
+      let roundNumber = Number(globalAccount.round);
+      let numPlayers = (roundAccount.players as Array<PublicKey>).length;
+      // let numPlayers = 0;
+      let prevRanNum = globalAccount.number;
+
       // Set the state variables with the fetched data
       setCurrentRound(roundNumber as number);
       // Assuming `roundAccount.players` and `roundAccount.previousRandomNumber` exist
       setNumberOfPlayers(numPlayers as number);
       setPreviousRandomNumber(prevRanNum as number);
     };
-  
+
     // Call the fetch function immediately to update state on component mount
-    fetchData().catch(error => {
-      console.error("Fetching data failed:", error);
+    fetchData().catch((error) => {
+      console.error('Fetching data failed:', error);
       // Optionally set an error state here
     });
-  
+
     // Set up a timer to refresh state periodically
     const intervalId = setInterval(() => {
       fetchData().catch(console.error);
-    }, 5000); // Refresh every 5000 milliseconds (5 seconds)
-  
+    }, 2500); // Refresh every 2500 milliseconds (2.5 seconds)
+
     // Clean up the interval on component unmount
     return () => clearInterval(intervalId);
-  }, []); // Empty dependency array means this effect runs once on mount
-  
+  }, [program]); // Empty dependency array means this effect runs once on mount
+  // when the program is updated, the useEffect is updated
 
   const handleSolAmountChangeOver = (event: {
     target: { value: SetStateAction<string> };
@@ -229,124 +232,130 @@ export default function DashboardFeature() {
         title="Over / Under"
         subtitle="Bet on whether the current round's random number will be higher or lower than the previous round's random number, 0 - 100."
       >
-        {/* Explainer Modal Section */}
-        <div
-          className="explainer-modal"
-          style={{ textAlign: 'center', marginBottom: '1rem' }}
-        >
-          <ExplainerUiModal
-            show={showModal}
-            hideModal={() => setShowModal(false)}
-          />
-          <button
-            className="btn btn-xs lg:btn-md btn-primary"
-            onClick={() => setShowModal(true)}
-            style={{ margin: 'auto', marginBottom: '1.5rem' }}
-          >
-            How It Works
-          </button>
-        </div>
-
-        {/* Centered Current Round and Previous Number Section */}
-        <div className="text-center" style={{ marginBottom: '2rem' }}>
-        <div style={{ fontSize: '1rem', marginBottom: '1rem' }}>
-          <p>Current Round: {currentRound}</p>
-          <p>Number of Players: {numberOfPlayers}/10</p>
-        </div>
-        <div style={{ fontSize: '1.50rem' }}>
-          <p style={{ textAlign: 'center' }}>
-            Previous Random Number:
-            <br />
-            <span style={{ display: 'block', fontSize: '2.5rem' }}>{previousRandomNumber}</span>
-          </p>
-        </div>
-      </div>
-
-        {/* Flex container for Bet Over and Bet Under Sections */}
-        <div className="flex justify-between max-w-6xl mx-auto sm:px-6 lg:px-8">
-          {/* Bet Under Section */}
-          <div
-            className="flex justify-center items-center"
-            style={{
-              width: '40%',
-              alignSelf: 'flex-end',
-              paddingBottom: '20%',
-            }}
-          >
-            <button onClick={handleBetUnder} className="button">
-              Bet{' '}
-              <span
+        {[
+          <div>
+            {/* Explainer Modal Section */}
+            <div
+              className="explainer-modal"
+              style={{ textAlign: 'center', marginBottom: '1rem' }}
+            >
+              <ExplainerUiModal
+                show={showModal}
+                hideModal={() => setShowModal(false)}
+              />
+              <button
+                className="btn btn-xs lg:btn-md btn-primary"
+                onClick={() => setShowModal(true)}
+                style={{ margin: 'auto', marginBottom: '1.5rem' }}
+              >
+                How It Works
+              </button>
+            </div>
+      
+            {/* Centered Current Round and Previous Number Section */}
+            <div className="text-center" style={{ marginBottom: '2rem' }}>
+              <div style={{ fontSize: '1rem', marginBottom: '1rem' }}>
+                <p>Current Round: {currentRound}</p>
+                <p>Number of Players: {numberOfPlayers}/10</p>
+              </div>
+              <div style={{ fontSize: '1.50rem' }}>
+                <p style={{ textAlign: 'center' }}>
+                  Previous Random Number:
+                  <br />
+                  <span style={{ display: 'block', fontSize: '2.5rem' }}>
+                    {previousRandomNumber}
+                  </span>
+                </p>
+              </div>
+            </div>
+      
+            {/* Flex container for Bet Over and Bet Under Sections */}
+            <div className="flex justify-between max-w-6xl mx-auto sm:px-6 lg:px-8">
+              {/* Bet Under Section */}
+              <div
+                className="flex justify-center items-center"
                 style={{
-                  textDecoration: 'underline',
-                  textDecorationColor: 'white',
-                  textDecorationThickness: '1px',
-                  textUnderlineOffset: '3px',
+                  width: '40%',
+                  alignSelf: 'flex-end',
+                  paddingBottom: '20%',
                 }}
               >
-                Under
-              </span>
-            </button>
-            <input
-              type="number"
-              value={solAmountUnder}
-              onChange={handleSolAmountChangeUnder}
-              className="input"
-              placeholder="Bet SOL "
-              style={{
-                textAlign: 'right',
-                marginLeft: '10px',
-                border: '1px solid white',
-              }}
-            />
-          </div>
-
-          {/* Aesthetic Vertical Bar */}
-          <div
-            style={{
-              height: '100px', // Adjust based on your design needs
-              width: '1px',
-              paddingBottom: '44%',
-              backgroundColor: '#FFFFFF', // Or any color that fits the design
-              alignSelf: 'center', // This centers the bar vertically within the flex container
-            }}
-          ></div>
-
-          {/* Bet Over Section */}
-          <div
-            className="flex justify-center items-center"
-            style={{
-              width: '40%',
-              alignSelf: 'flex-end',
-              paddingBottom: '20%',
-            }}
-          >
-            <input
-              type="number"
-              value={solAmountOver}
-              onChange={handleSolAmountChangeOver}
-              className="input"
-              placeholder="Bet SOL"
-              style={{
-                textAlign: 'left',
-                marginRight: '10px',
-                border: '1px solid white',
-              }}
-            />
-            <button onClick={handleBetOver} className="button">
-              Bet{' '}
-              <span
+                <button onClick={handleBetUnder} className="button">
+                  Bet{' '}
+                  <span
+                    style={{
+                      textDecoration: 'underline',
+                      textDecorationColor: 'white',
+                      textDecorationThickness: '1px',
+                      textUnderlineOffset: '3px',
+                    }}
+                  >
+                    Under
+                  </span>
+                </button>
+                <input
+                  type="number"
+                  value={solAmountUnder}
+                  onChange={handleSolAmountChangeUnder}
+                  className="input"
+                  placeholder="Bet SOL "
+                  style={{
+                    textAlign: 'right',
+                    marginLeft: '10px',
+                    border: '1px solid white',
+                  }}
+                />
+              </div>
+      
+              {/* Aesthetic Vertical Bar */}
+              <div
                 style={{
-                  textDecoration: 'underline',
-                  textDecorationColor: 'white',
-                  textDecorationThickness: '1px',
-                  textUnderlineOffset: '3px',
+                  height: '100px', // Adjust based on your design needs
+                  width: '1px',
+                  paddingBottom: '44%',
+                  backgroundColor: '#FFFFFF', // Or any color that fits the design
+                  alignSelf: 'center', // This centers the bar vertically within the flex container
+                }}
+              ></div>
+      
+              {/* Bet Over Section */}
+              <div
+                className="flex justify-center items-center"
+                style={{
+                  width: '40%',
+                  alignSelf: 'flex-end',
+                  paddingBottom: '20%',
                 }}
               >
-                Over
-              </span>
-            </button>
-          </div>
-        </div>
+                <input
+                  type="number"
+                  value={solAmountOver}
+                  onChange={handleSolAmountChangeOver}
+                  className="input"
+                  placeholder="Bet SOL"
+                  style={{
+                    textAlign: 'left',
+                    marginRight: '10px',
+                    border: '1px solid white',
+                  }}
+                />
+                <button onClick={handleBetOver} className="button">
+                  Bet{' '}
+                  <span
+                    style={{
+                      textDecoration: 'underline',
+                      textDecorationColor: 'white',
+                      textDecorationThickness: '1px',
+                      textUnderlineOffset: '3px',
+                    }}
+                  >
+                    Over
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>,
+        ]}
       </AppHero>
     </div>
   );

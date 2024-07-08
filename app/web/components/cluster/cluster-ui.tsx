@@ -100,13 +100,16 @@ export function ExplainerUiModal({
 }) {
   const markdown = `
 ### 1. A random number 0-100 is generated every Round.
+&nbsp;
 ### 2. Players bet on whether the outcome of current Round's Random Number will be:
 -- **higher** than (over) the previous Round's Random Number. --
-
-                          or                                
+or                                
 -- **lower** than (under) the previous Round's Random Number. --
+&nbsp;
 ### 3. Losers pay Winners.
+&nbsp;
 ### 4. player_winnings = ( player_bet  /  winning_bets_sum ) * total_pot
+&nbsp;
 ### 5. If the random number is the same as the previous number, or if everyone loses, the House wins the entire pot. 
 
 [**Link to GitHub**](https://github.com/bgoober/over_under)
@@ -139,7 +142,7 @@ export function ExplainerUiModal({
   return (
     <AppModal title="Over / Under" hide={hideModal} show={show}>
       <div
-        style={{ textAlign: 'left', marginLeft: '0.5rem', overflowX: 'auto' }}
+        style={{ textAlign: 'center', marginLeft: '0.5rem', overflowX: 'auto' }}
       >
         {view === 'markdown' && (
           <>

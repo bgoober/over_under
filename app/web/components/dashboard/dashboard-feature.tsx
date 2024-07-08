@@ -2,7 +2,7 @@
 
 'use client';
 
-import { SetStateAction, useState } from 'react';
+import { SetStateAction, useEffect, useState } from 'react';
 import { AppHero } from '../ui/ui-layout';
 import { ExplainerUiModal } from '../cluster/cluster-ui';
 import { useProgram } from '../../utils/useProgram';
@@ -23,7 +23,58 @@ export default function DashboardFeature() {
   const { connection } = useConnection();
   const wallet = useAnchorWallet();
 
+  const [currentRound, setCurrentRound] = useState<number>(0);
+  const [numberOfPlayers, setNumberOfPlayers] = useState<number>(0);
+  const [previousRandomNumber, setPreviousRandomNumber] = useState<number>(0);
+
   const { program } = useProgram({ connection, wallet });
+  useEffect(() => {
+    if (!program) return; // Add null check for program
+  
+    // Async function to fetch and set the state variables
+    const fetchData = async () => {
+      // Assuming `program` and `house` are already defined
+      const [global] = web3.PublicKey.findProgramAddressSync(
+        [Buffer.from('global'), house.publicKey.toBuffer()],
+        program.programId
+      );
+      const globalAccount = await program.account.global.fetch(global);
+  
+      const _roundBN = new BN((globalAccount.round as number).toString());
+      const _roundBuffer = _roundBN.toArrayLike(Buffer, 'le', 8);
+      const [round] = web3.PublicKey.findProgramAddressSync(
+        [Buffer.from('round'), global.toBuffer(), _roundBuffer],
+        program.programId
+      );
+  
+      const roundAccount = await program.account.round.fetch(round) as { players: any[] };
+      
+      let roundNumber = globalAccount.round;
+      let numPlayers = roundAccount.players.length;
+      let prevRanNum = globalAccount.number
+  
+      // Set the state variables with the fetched data
+      setCurrentRound(roundNumber as number);
+      // Assuming `roundAccount.players` and `roundAccount.previousRandomNumber` exist
+      setNumberOfPlayers(numPlayers as number);
+      setPreviousRandomNumber(prevRanNum as number);
+    };
+  
+    // Call the fetch function immediately to update state on component mount
+    fetchData().catch(error => {
+      console.error("Fetching data failed:", error);
+      // Optionally set an error state here
+    });
+  
+    // Set up a timer to refresh state periodically
+    const intervalId = setInterval(() => {
+      fetchData().catch(console.error);
+    }, 5000); // Refresh every 5000 milliseconds (5 seconds)
+  
+    // Clean up the interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []); // Empty dependency array means this effect runs once on mount
+  
 
   const handleSolAmountChangeOver = (event: {
     target: { value: SetStateAction<string> };
@@ -195,20 +246,21 @@ export default function DashboardFeature() {
             How It Works
           </button>
         </div>
+
         {/* Centered Current Round and Previous Number Section */}
         <div className="text-center" style={{ marginBottom: '2rem' }}>
-          <div style={{ fontSize: '1rem', marginBottom: '1rem' }}>
-            <p>Current Round: {5}</p>
-            <p>Number of Players: {0}/10</p>
-          </div>
-          <div style={{ fontSize: '1.50rem' }}>
-            <p style={{ textAlign: 'center' }}>
-              Previous Random Number:
-              <br />
-              <span style={{ display: 'block', fontSize: '2.5rem' }}>{42}</span>
-            </p>
-          </div>
+        <div style={{ fontSize: '1rem', marginBottom: '1rem' }}>
+          <p>Current Round: {currentRound}</p>
+          <p>Number of Players: {numberOfPlayers}/10</p>
         </div>
+        <div style={{ fontSize: '1.50rem' }}>
+          <p style={{ textAlign: 'center' }}>
+            Previous Random Number:
+            <br />
+            <span style={{ display: 'block', fontSize: '2.5rem' }}>{previousRandomNumber}</span>
+          </p>
+        </div>
+      </div>
 
         {/* Flex container for Bet Over and Bet Under Sections */}
         <div className="flex justify-between max-w-6xl mx-auto sm:px-6 lg:px-8">

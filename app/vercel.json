@@ -1,4 +1,7 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "dist/web/.next"
+  "outputDirectory": "dist/web/.next",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }

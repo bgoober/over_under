@@ -5,7 +5,8 @@
   "scripts": {
     "build": "nx build web",
     "dev": "nx serve web",
-    "export": "next export"
+    "start": "nx serve web --prod",
+    "export": "nx export web"
   },
   "private": true,
   "dependencies": {

@@ -24,8 +24,6 @@ const nextConfig = {
     serverComponentsExternalPackages: ["@coral-xyz/anchor"],
   },
   reactStrictMode: true,
-  output:'export',
-  // output: 'export', // Added here as part of the nextConfig object
   // any other configurations you have
 };
 

@@ -1,8 +1,5 @@
 {
   "buildCommand": "nx build web",
-  "outputDirectory": "dist/apps/web/.next",
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
+  "outputDirectory": "dist/apps/web/"
 }
 

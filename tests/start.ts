@@ -93,63 +93,63 @@ describe("over_under", () => {
       .then(log);
   });
 
-  it("Bet placed!", async () => {
-    const globalAccount = await program.account.global.fetch(global);
-    // Use a BN object for operations requiring BN
-    const _roundBN = new BN(globalAccount.round.toString());
+  // it("Bet placed!", async () => {
+  //   const globalAccount = await program.account.global.fetch(global);
+  //   // Use a BN object for operations requiring BN
+  //   const _roundBN = new BN(globalAccount.round.toString());
 
-    // Convert to 8-byte Buffer in little-endian for other operations
-    const _roundBuffer = _roundBN.toArrayLike(Buffer, "le", 8);
-    const [round] = web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("round"), global.toBuffer(), _roundBuffer],
-      program.programId
-    );
+  //   // Convert to 8-byte Buffer in little-endian for other operations
+  //   const _roundBuffer = _roundBN.toArrayLike(Buffer, "le", 8);
+  //   const [round] = web3.PublicKey.findProgramAddressSync(
+  //     [Buffer.from("round"), global.toBuffer(), _roundBuffer],
+  //     program.programId
+  //   );
 
-    const [vault] = web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("vault"), round.toBuffer()],
-      program.programId
-    );
-    const roundAccount = await program.account.round.fetch(round);
-    console.log(`round: `, roundAccount.round.toString());
+  //   const [vault] = web3.PublicKey.findProgramAddressSync(
+  //     [Buffer.from("vault"), round.toBuffer()],
+  //     program.programId
+  //   );
+  //   const roundAccount = await program.account.round.fetch(round);
+  //   console.log(`round: `, roundAccount.round.toString());
 
-    console.log(`global round: `, globalAccount.round.toString());
+  //   console.log(`global round: `, globalAccount.round.toString());
 
-    let round_number = roundAccount.round.toNumber();
-    console.log(`round number: `, round_number);
+  //   let round_number = roundAccount.round.toNumber();
+  //   console.log(`round number: `, round_number);
 
-    // This should be the player's public key or similar identifier
-    const [bet] = web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("bet"), round.toBuffer(), keypair.publicKey.toBuffer()],
-      program.programId
-    );
-    console.log(`bet: `, bet.toString());
+  //   // This should be the player's public key or similar identifier
+  //   const [bet] = web3.PublicKey.findProgramAddressSync(
+  //     [Buffer.from("bet"), round.toBuffer(), keypair.publicKey.toBuffer()],
+  //     program.programId
+  //   );
+  //   console.log(`bet: `, bet.toString());
 
-    // Assuming BN is already imported
-    // Convert the first and third arguments to BN
-    const amountBN = new BN(10);
-    const roundNumberBN = new BN(round_number);
+  //   // Assuming BN is already imported
+  //   // Convert the first and third arguments to BN
+  //   const amountBN = new BN(10);
+  //   const roundNumberBN = new BN(round_number);
 
-    // Assuming solAmountUnder is a string representing the SOL amount,
-    // convert it to a BigNumber representing lamports.
-    // 1 SOL = 1,000,000,000 lamports
-    const lamportsPerSol = new BN(1_000_000_000);
-    const amountInLamports = amountBN.mul(lamportsPerSol);
+  //   // Assuming solAmountUnder is a string representing the SOL amount,
+  //   // convert it to a BigNumber representing lamports.
+  //   // 1 SOL = 1,000,000,000 lamports
+  //   const lamportsPerSol = new BN(1_000_000_000);
+  //   const amountInLamports = amountBN.mul(lamportsPerSol);
 
-    const tx = await program.methods
-      .placeBet(amountInLamports, 1, roundNumberBN) // Use BN objects for the first and third arguments
-      .accounts({
-        house: keypair.publicKey,
-        global,
-        round,
-        vault,
-        bet,
-        player: keypair.publicKey,
-        systemProgram: SystemProgram.programId,
-      })
-      .signers([keypair])
-      .rpc()
-      .then(confirm)
-      .then(log);
+  //   const tx = await program.methods
+  //     .placeBet(amountInLamports, 1, roundNumberBN) // Use BN objects for the first and third arguments
+  //     .accounts({
+  //       house: keypair.publicKey,
+  //       global,
+  //       round,
+  //       vault,
+  //       bet,
+  //       player: keypair.publicKey,
+  //       systemProgram: SystemProgram.programId,
+  //     })
+  //     .signers([keypair])
+  //     .rpc()
+  //     .then(confirm)
+  //     .then(log);
 
   //   // fetch the bet
   //   //   const betAccount = await program.account.bet.fetch(bet);

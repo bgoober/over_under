@@ -76,7 +76,7 @@ describe("over_under", () => {
 
     // Assuming BN is already imported
     // Convert the first and third arguments to BN
-    const amountBN = new BN(100*1_000_000_000);
+    const amountBN = new BN(1*1_000_000_000);
     const roundNumberBN = new BN(round_number);
 
     const tx = await program.methods

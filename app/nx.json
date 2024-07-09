@@ -11,7 +11,7 @@
   },
   "targetDefaults": {
     "@nx/next:build": {
-      "cache": false,
+      "cache": true,
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"]
     },

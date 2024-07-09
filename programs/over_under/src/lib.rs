@@ -33,6 +33,12 @@ pub mod over_under {
     pub fn place_bet(ctx: Context<BetC>, amount: u64, bet: u8, round: u64) -> Result<()> {
         ctx.accounts.init(amount, bet, round, &ctx.bumps)?;
         ctx.accounts.deposit(amount)?;
+
+        emit!(BetEvent {
+            address: ctx.accounts.player.key(),
+            bet: ctx.accounts.bet.bet,
+            amount: ctx.accounts.bet.amount
+        });
         Ok(())
     }
 
@@ -167,4 +173,11 @@ pub mod over_under {
         let _ctx = ctx;
         Ok(())
     }
+}
+
+#[event]
+pub struct BetEvent {
+    pub address: Pubkey,
+    pub bet: u8,
+    pub amount: u64,
 }

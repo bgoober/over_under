@@ -14,8 +14,7 @@ import { SystemProgram } from '@solana/web3.js';
 const house = new PublicKey('4QPAeQG6CTq2zMJAVCJnzY9hciQteaMkgBmcyGL7Vrwp');
 
 export default function DashboardFeature() {
-  const [solAmountOver, setSolAmountOver] = useState('');
-  const [solAmountUnder, setSolAmountUnder] = useState('');
+  const [betAmount, setBetAmount] = useState(''); // Single state for bet amount
   const [showModal, setShowModal] = useState(false);
   const { connection } = useConnection();
   const wallet = useAnchorWallet();
@@ -73,17 +72,6 @@ export default function DashboardFeature() {
   }, [program]); // Depend on `program` to re-run effect if it changes
   // when the program is updated, the useEffect is updated
 
-  const handleSolAmountChangeOver = (event: {
-    target: { value: SetStateAction<string> };
-  }) => {
-    setSolAmountOver(event.target.value);
-  };
-
-  const handleSolAmountChangeUnder = (event: {
-    target: { value: SetStateAction<string> };
-  }) => {
-    setSolAmountUnder(event.target.value);
-  };
 
   const confirm = async (signature: string): Promise<string> => {
     const block = await connection.getLatestBlockhash();
@@ -97,13 +85,13 @@ export default function DashboardFeature() {
   };
 
   const handleBetOver = async () => {
-    console.log(`Betting OVER with ${solAmountOver} SOL`);
+    console.log(`Betting OVER with ${betAmount} SOL`);
     if (!program || !wallet) return;
     // Assuming solAmountUnder is a string representing the SOL amount,
     // convert it to a BigNumber representing lamports.
     // 1 SOL = 1,000,000,000 lamports
     const lamportsPerSol = new BN(1_000_000_000);
-    const amountInSol = new BN(solAmountOver); // This might need parsing if solAmountUnder is not already a BN compatible format
+    const amountInSol = new BN(betAmount); // This might need parsing if solAmountUnder is not already a BN compatible format
     const amountInLamports = amountInSol.mul(lamportsPerSol);
     const betnumber = 1;
 
@@ -157,14 +145,14 @@ export default function DashboardFeature() {
   };
 
   const handleBetUnder = async () => {
-    console.log(`Betting UNDER with ${solAmountUnder} SOL`);
+    console.log(`Betting UNDER with ${betAmount} SOL`);
     if (!program || !wallet) return;
 
     // Assuming solAmountUnder is a string representing the SOL amount,
     // convert it to a BigNumber representing lamports.
     // 1 SOL = 1,000,000,000 lamports
     const lamportsPerSol = new BN(1_000_000_000);
-    const amountInSol = new BN(solAmountUnder); // This might need parsing if solAmountUnder is not already a BN compatible format
+    const amountInSol = new BN(betAmount); // This might need parsing if solAmountUnder is not already a BN compatible format
     const amountInLamports = amountInSol.mul(lamportsPerSol);
 
     // console.log("Program:", program);
@@ -262,91 +250,30 @@ export default function DashboardFeature() {
           </div>
         </div>
 
-        {/* Flex container for Bet Over and Bet Under Sections */}
-        <div className="flex justify-between max-w-6xl mx-auto sm:px-6 lg:px-8">
-          {/* Bet Under Section */}
-          <div
-            className="flex justify-center items-center"
-            style={{
-              width: '40%',
-              alignSelf: 'flex-end',
-              paddingBottom: '20%',
-            }}
-          >
-            <button onClick={handleBetUnder} className="button">
-              Bet{' '}
-              <span
-                style={{
-                  textDecoration: 'underline',
-                  textDecorationColor: 'white',
-                  textDecorationThickness: '1px',
-                  textUnderlineOffset: '3px',
-                }}
-              >
-                Under
-              </span>
-            </button>
-            <input
-              type="number"
-              value={solAmountUnder}
-              onChange={handleSolAmountChangeUnder}
-              className="input"
-              placeholder="Bet SOL "
-              style={{
-                textAlign: 'right',
-                marginLeft: '10px',
-                border: '1px solid white',
-              }}
-            />
-          </div>
-
-          {/* Aesthetic Vertical Bar */}
-          <div
-            style={{
-              height: '100px', // Adjust based on your design needs
-              width: '1px',
-              paddingBottom: '44%',
-              backgroundColor: '#FFFFFF', // Or any color that fits the design
-              alignSelf: 'center', // This centers the bar vertically within the flex container
-            }}
-          ></div>
-
-          {/* Bet Over Section */}
-          <div
-            className="flex justify-center items-center"
-            style={{
-              width: '40%',
-              alignSelf: 'flex-end',
-              paddingBottom: '20%',
-            }}
-          >
-            <input
-              type="number"
-              value={solAmountOver}
-              onChange={handleSolAmountChangeOver}
-              className="input"
-              placeholder="Bet SOL"
-              style={{
-                textAlign: 'left',
-                marginRight: '10px',
-                border: '1px solid white',
-              }}
-            />
-            <button onClick={handleBetOver} className="button">
-              Bet{' '}
-              <span
-                style={{
-                  textDecoration: 'underline',
-                  textDecorationColor: 'white',
-                  textDecorationThickness: '1px',
-                  textUnderlineOffset: '3px',
-                }}
-              >
-                Over
-              </span>
-            </button>
-          </div>
-        </div>
+        <div className="betting-container" style={{ textAlign: 'center' }}>
+      <button
+        onClick={handleBetOver}
+        aria-label="Bet Over"
+        style={{ marginBottom: '10px', color: 'lightgreen' }}
+      >
+        Bet Over
+      </button>
+      <input
+        type="number"
+        value={betAmount}
+        onChange={(e) => setBetAmount(e.target.value)}
+        placeholder="Bet SOL"
+        aria-label="Bet Amount"
+        style={{ display: 'block', margin: '0 auto', marginBottom: '10px', background: '#15191e' }}
+      />
+      <button
+        onClick={handleBetUnder}
+        aria-label="Bet Under"
+        style={{ marginTop: '10px', color: 'salmon' }}
+      >
+        Bet Under
+      </button>
+    </div>
       </AppHero>
     </div>
   );

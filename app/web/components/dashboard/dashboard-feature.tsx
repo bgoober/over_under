@@ -11,9 +11,7 @@ import { BN, web3 } from '@coral-xyz/anchor';
 import { Keypair, PublicKey, sendAndConfirmTransaction } from '@solana/web3.js';
 
 import { SystemProgram } from '@solana/web3.js';
-// import wallet2 from '../../../../wallet.json';
 const house = new PublicKey('4QPAeQG6CTq2zMJAVCJnzY9hciQteaMkgBmcyGL7Vrwp');
-// const player1 = Keypair.fromSecretKey(new Uint8Array(wallet2));
 
 export default function DashboardFeature() {
   const [solAmountOver, setSolAmountOver] = useState('');

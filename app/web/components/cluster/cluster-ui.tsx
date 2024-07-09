@@ -8,8 +8,8 @@ import { AppModal } from '../ui/ui-layout';
 import { ClusterNetwork, useCluster } from './cluster-data-access';
 import { Connection } from '@solana/web3.js';
 import ReactMarkdown from 'react-markdown';
-import { Carousel } from 'react-responsive-carousel';
-import 'react-responsive-carousel/lib/styles/carousel.min.css'; // Import carousel styles
+// import { Carousel } from 'react-responsive-carousel';
+// import 'react-responsive-carousel/lib/styles/carousel.min.css'; // Import carousel styles
 
 export function ExplorerLink({
   path,

@@ -25,7 +25,7 @@ const nextConfig = {
   },
   reactStrictMode: true,
   trailingSlash: true,
-  distDir: 'dist',
+  distDir: '/dist/web',
 
 
   // any other configurations you have

@@ -23,6 +23,8 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ["@coral-xyz/anchor"],
   },
+  output: 'export', // Added here as part of the nextConfig object
+  // any other configurations you have
 };
 
 const plugins = [

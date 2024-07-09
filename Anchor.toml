@@ -7,11 +7,14 @@ skip-lint = true
 [programs.localnet]
 over_under = "6qUeZY7njik5mb5Q3MCGkdyt8NSvyLtAxsDnErhVm6dV"
 
+[programs.devnet]
+over_under = "6qUeZY7njik5mb5Q3MCGkdyt8NSvyLtAxsDnErhVm6dV"
+
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

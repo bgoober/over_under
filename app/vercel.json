@@ -1,5 +1,7 @@
 {
-  "buildCommand": "nx build web",
-  "outputDirectory": "dist/apps/web/"
+  "buildCommand": "cd over_under/app/web && npm run build",
+  "outputDirectory": "over_under/app/web/dist",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/over_under/app/web/dist/index.html" }
+  ]
 }
-

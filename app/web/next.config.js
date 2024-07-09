@@ -24,6 +24,10 @@ const nextConfig = {
     serverComponentsExternalPackages: ["@coral-xyz/anchor"],
   },
   reactStrictMode: true,
+  trailingSlash: true,
+  distDir: 'dist',
+
+
   // any other configurations you have
 };
 
